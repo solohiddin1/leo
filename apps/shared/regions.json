@@ -1,0 +1,142 @@
+[
+  {
+    "model": "shared.region",
+    "pk": 1,
+    "fields": {
+      "soato_id": 1703,
+      "name_uz": "Andijon viloyati",
+      "name_ru": "Андижанская область",
+      "name_en": "Andijan region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 2,
+    "fields": {
+      "soato_id": 1706,
+      "name_uz": "Buxoro viloyati",
+      "name_ru": "Бухарская область",
+      "name_en": "Bukhara region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 3,
+    "fields": {
+      "soato_id": 1708,
+      "name_uz": "Jizzax viloyati",
+      "name_ru": "Джизакская область",
+      "name_en": "Jizzakh region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 4,
+    "fields": {
+      "soato_id": 1710,
+      "name_uz": "Qashqadaryo viloyati",
+      "name_ru": "Кашкадарьинская область",
+      "name_en": "Kashkadarya region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 5,
+    "fields": {
+      "soato_id": 1712,
+      "name_uz": "Navoiy viloyati",
+      "name_ru": "Навоийская область",
+      "name_en": "Navoi region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 6,
+    "fields": {
+      "soato_id": 1714,
+      "name_uz": "Namangan viloyati",
+      "name_ru": "Наманганская область",
+      "name_en": "Namangan region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 7,
+    "fields": {
+      "soato_id": 1718,
+      "name_uz": "Samarqand viloyati",
+      "name_ru": "Самаркандская область",
+      "name_en": "Samarkand region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 8,
+    "fields": {
+      "soato_id": 1722,
+      "name_uz": "Surxondaryo viloyati",
+      "name_ru": "Сурхандарьинская область",
+      "name_en": "Surkhandarya region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 9,
+    "fields": {
+      "soato_id": 1724,
+      "name_uz": "Sirdaryo viloyati",
+      "name_ru": "Сырдарьинская область",
+      "name_en": "Sirdarya region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 10,
+    "fields": {
+      "soato_id": 1726,
+      "name_uz": "Toshkent shahri",
+      "name_ru": "город Ташкент",
+      "name_en": "Tashkent city"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 11,
+    "fields": {
+      "soato_id": 1727,
+      "name_uz": "Toshkent viloyati",
+      "name_ru": "Ташкентская область",
+      "name_en": "Tashkent region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 12,
+    "fields": {
+      "soato_id": 1730,
+      "name_uz": "Farg'ona viloyati",
+      "name_ru": "Ферганская область",
+      "name_en": "Fergana region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 13,
+    "fields": {
+      "soato_id": 1733,
+      "name_uz": "Xorazm viloyati",
+      "name_ru": "Хорезмская область",
+      "name_en": "Khorezm region"
+    }
+  },
+  {
+    "model": "shared.region",
+    "pk": 14,
+    "fields": {
+      "soato_id": 1735,
+      "name_uz": "Qoraqalpog'iston Respublikasi",
+      "name_ru": "Республика Каракалпакстан",
+      "name_en": "Republic of Karakalpakstan"
+    }
+  }
+]

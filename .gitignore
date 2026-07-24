@@ -1,0 +1,13 @@
+.env
+.venv
+static
+media
+logs/
+*.pyc
+.idea
+.vscode/
+*db.sqlite3
+__pycache__/
+**/__pycache__/
+**/migrations/*.py
+!**/migrations/__init__.py
