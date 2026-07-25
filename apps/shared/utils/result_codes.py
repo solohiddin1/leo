@@ -9,7 +9,10 @@ class ResultCodes(Enum):
     INVALID_CREDENTIALS = -5
     INVALID_REFRESH_TOKEN = -6
     PRODUCT_QUANTITY_NOT_ENOUGH = -7
+    INCORRECT_OTP = -8
     BANNER_NOT_FOUND = -9
+    OTP_EXPIRED = -10
+    OTP_ALREADY_USED = -11
 
 ResultMessages = {
     "SUCCESS": {
@@ -52,9 +55,24 @@ ResultMessages = {
         "en": "Product quantity not enough.",
         "ru": "Недостаточное количество товара.",
     },
+    "INCORRECT_OTP": {
+        "uz": "Kiritilgan kod noto'g'ri.",
+        "en": "Incorrect OTP.",
+        "ru": "Неверный OTP.",
+    },
     "BANNER_NOT_FOUND": {
         "uz": "Banner topilmadi.",
         "en": "Banner not found.",
         "ru": "Баннер не найден.",
+    },
+    "OTP_EXPIRED": {
+        "uz": "Kiritilgan kod muddati o'tgan.",
+        "en": "OTP expired.",
+        "ru": "Срок действия OTP истёк.",
+    },
+    "OTP_ALREADY_USED": {
+        "uz": "Kiritilgan kod allaqachon ishlatilgan.",
+        "en": "OTP already used.",
+        "ru": "OTP уже использован.",
     },
 }
