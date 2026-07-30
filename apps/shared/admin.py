@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.shared.models import Region, Filial
+from apps.shared.models import Region, Filial, SiteConfig
 
 
 @admin.register(Region)
@@ -12,3 +12,8 @@ class RegionAdmin(admin.ModelAdmin):
 class FilialAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'region', 'phone_number', 'address', 'lat', 'long')
     list_filter = ('region',)
+
+
+@admin.register(SiteConfig)
+class SiteConfigAdmin(admin.ModelAdmin):
+    list_display = ('send_otp_code', 'otp_wait_seconds', 'otp_timeout_seconds')

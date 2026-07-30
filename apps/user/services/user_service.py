@@ -1,18 +1,27 @@
-from datetime import timezone
+from django.utils import timezone
 
 from apps.shared.utils.result_codes import ResultCodes
 from apps.user.models import User
 from apps.shared.utils.utils import success_response, error_response
-from apps.user.api.serializers.register import RegisterSerializer
 from apps.user.repositories.user_repo import UserRepo
+from apps.user.services.sms import SmsService
 
 class UserService:
     @staticmethod
     def register(data: dict) -> User:
-        user = User.objects.create_user(**data)
+        device_id = data.pop("device_id")
+        user = UserRepo.get_user_by_username(data["username"])
+        if user is None:
+            user = User.objects.create_user(**data)
         user.save()
-        data = RegisterSerializer(user).data
-        return success_response(data)
+        otp = SmsService.generate_otp()
+
+        return success_response(
+            {
+                "username": user.username,
+                "otp": otp
+            }
+        )
 
     @staticmethod
     def verify_otp(user_id: int, otp_code: str, ):
@@ -21,6 +30,8 @@ class UserService:
             if user is None:
                 return error_response(ResultCodes.USER_NOT_FOUND)
             otp = UserRepo.get_user_last_otp(user)
+            if otp is None:
+                return error_response(ResultCodes.OTP_EXPIRED)
             if otp != otp_code:
                 return error_response(ResultCodes.INCORRECT_OTP)
             if otp.is_used:

@@ -11,4 +11,4 @@ class VerifyOTPAPIView(GenericAPIView):
         otp = request.data.get('otp')
         phone_number = request.data.get('phone_number')
 
-        result = UserService.verify_otp(phone_number, otp)
+        return UserService.verify_otp(phone_number, otp)

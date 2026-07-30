@@ -23,3 +23,12 @@ class Filial(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+class SiteConfig(BaseModel):
+    send_otp_code = models.BooleanField(default=False)
+    otp_wait_seconds = models.IntegerField(default=0)
+    otp_timeout_seconds = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.send_otp_code}-{self.otp_wait_seconds}-{self.otp_timeout_seconds}"

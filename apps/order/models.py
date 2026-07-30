@@ -26,3 +26,17 @@ class OrderItem(BaseModel):
 
     def __str__(self):
         return f"OrderItem #{self.pk}"
+
+
+class Cart(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_cart')
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+
+
+class CartItem(BaseModel):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_carts')
+    quantity = models.BigIntegerField(default=1)
+    price = models.BigIntegerField(default=0)
