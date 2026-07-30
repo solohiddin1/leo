@@ -10,6 +10,7 @@ from apps.user.services.telegram import TgOtpService
 
 class TelegramOtpView(GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = None
 
     def post(self, request, *args, **kwargs):
         try:
@@ -24,6 +25,7 @@ class TelegramOtpView(GenericAPIView):
 
 class TelegramWebhookView(GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = None
 
     def post(self, request, *args, **kwargs):
         print("Telegram Webhook Data:", request.data)
@@ -33,6 +35,7 @@ class TelegramWebhookView(GenericAPIView):
 
 class TelegramOtpPollView(GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = None
 
     def get(self, request, *args, **kwargs):
         token = request.query_params.get("token")
@@ -49,13 +52,13 @@ class TelegramOtpVerifyView(GenericAPIView):
     serializer_class = TelegramOtpVerifySerializer
 
     def post(self, request, *args, **kwargs):
-        user_id = request.data.get("id")
+        token = request.data.get("token")
         otp = request.data.get("otp")
-        if not user_id or not otp:
+        if not token or not otp:
             return error_response(ResultCodes.UNKNOWN_ERROR, {
                 "en": "token and otp required", "ru": "token and otp required", "uz": "token va otp talab qilinadi"
             })
-        result = TgOtpService.verify_otp(user_id, otp)
+        result = TgOtpService.verify_otp(token, otp)
         if "error" in result:
             return error_response(ResultCodes.UNKNOWN_ERROR, {
                 "en": result["error"], "ru": result["error"], "uz": result["error"]

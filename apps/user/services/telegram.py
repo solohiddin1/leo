@@ -55,6 +55,7 @@ class TgOtpService:
         expires_at = timezone.now() + timedelta(minutes=settings.TELEGRAM_LOGIN_TOKEN_TTL_MINUTES)
         TelegramRepo.create_token(token, otp_mode, expires_at)
         return {
+            "token": token,
             "deep_link": f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}?start={token}",
             "poll": not otp_mode,
         }
@@ -120,21 +121,24 @@ class TgOtpService:
         return {"status": "PENDING"}
 
     @classmethod
-    def verify_otp(cls, user_id, code):
-        user = UserRepo.get_user_by_id(user_id)
-        if user is None:
-            return "user_not_exists"
-        otp = SmsRepo.get_valid_otp(user.id, str(code))
+    def verify_otp(cls, token_str, code):
+        row = TelegramRepo.get_token(token_str)
+        if not cls._is_usable(row):
+            return {"error": "expired"}
+        if not row.otp_mode or not row.user_id:
+            return {"error": "invalid"}
+
+        otp = SmsRepo.get_valid_otp(row.user_id, str(code))
         if not otp:
-            return "invalid_otp"
+            return {"error": "invalid_otp"}
 
         otp.is_used = True
         otp.is_verified = True
         otp.save(update_fields=["is_used", "is_verified"])
-        TelegramRepo.confirm_latest_with_user(user)
+        TelegramRepo.confirm(row, row.user)
 
         from rest_framework_simplejwt.tokens import RefreshToken
-        refresh = RefreshToken.for_user(user)
+        refresh = RefreshToken.for_user(row.user)
         return {
             "status": "CONFIRMED",
             "access": str(refresh.access_token),
