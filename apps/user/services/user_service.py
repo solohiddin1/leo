@@ -1,4 +1,5 @@
 from django.utils import timezone
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.shared.utils.result_codes import ResultCodes
 from apps.user.models import User
@@ -24,6 +25,15 @@ class UserService:
         )
 
     @staticmethod
+    def login(username: str, password: str):
+        user = User.objects.filter(username=username).first()
+        if user is None or not user.check_password(password):
+            return error_response(ResultCodes.INVALID_CREDENTIALS)
+        return success_response(
+            UserService.token_for_user(user)
+        )
+
+    @staticmethod
     def verify_otp(user_id: int, otp_code: str, ):
         try:
             user = User.objects.get(id=user_id)
@@ -41,3 +51,11 @@ class UserService:
             return otp
         except Exception:
             return error_response(ResultCodes.UNKNOWN_ERROR)
+
+    @staticmethod
+    def token_for_user(user: User) -> dict:
+        refresh = RefreshToken.for_user(user)
+        return {
+            "access": str(refresh.access_token),
+            "refresh": str(refresh)
+        }

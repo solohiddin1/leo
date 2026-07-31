@@ -1,4 +1,5 @@
 from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -23,7 +24,7 @@ class TelegramOtpView(GenericAPIView):
             })
 
 
-class TelegramWebhookView(GenericAPIView):
+class TelegramWebhookView(APIView):
     permission_classes = [AllowAny]
     serializer_class = None
 

@@ -134,7 +134,19 @@ SPECTACULAR_SETTINGS = {
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '1000/day',  # no auth
+        'user': '10000/day',  # with auth
+        'dashboard_auth': '3/5min',
+        'otp': '5/hour',
+        'login': '10/hour',
+        'general': '100/hour'
+    },
 }
 
 TELEGRAM_BOT_USERNAME = getenv('TELEGRAM_BOT_USERNAME')
