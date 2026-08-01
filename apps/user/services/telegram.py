@@ -97,7 +97,7 @@ class TgOtpService:
 
         user = UserRepo.get_user_by_telegram_id(telegram_id)
         if user:
-            TelegramRepo.confirm(row, user)
+            # TelegramRepo.confirm(row, user)
             TelegramClient.send_message(chat_id, cls._success_msg(), reply_markup=REMOVE_KEYBOARD)
         else:
             TelegramClient.send_message(chat_id, ASK_PHONE_MSG, reply_markup=CONTACT_KEYBOARD)
@@ -161,6 +161,7 @@ class TgOtpService:
             return
 
         row = TelegramRepo.get_pending_token_by_telegram_id(telegram_id)
+        logger.info(f"contact from telegram login {row}, {telegram_id}")
         if not row:
             return
         if not cls._is_usable(row):
