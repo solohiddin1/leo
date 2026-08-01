@@ -6,6 +6,7 @@ from apps.user.models import User
 from apps.shared.utils.utils import success_response, error_response
 from apps.user.repositories.user_repo import UserRepo
 from apps.user.services.sms import SmsService
+from apps.order.repositories.cart_repo import CartRepo
 
 class UserService:
     @staticmethod
@@ -15,6 +16,7 @@ class UserService:
         if user is None:
             user = User.objects.create_user(**data)
         user.save()
+        CartRepo.get_or_create_cart(user)
         otp = SmsService.generate_otp()
 
         return success_response(
@@ -34,9 +36,15 @@ class UserService:
         )
 
     @staticmethod
+    def set_user_password(user: User, password: str):
+        user.set_password(password)
+        user.save()
+        return success_response(ResultCodes.PASSWORD_UPDATED_SUCCESS)
+
+    @staticmethod
     def verify_otp(user_id: int, otp_code: str, ):
         try:
-            user = User.objects.get(id=user_id)
+            user = UserRepo.get_user_by_id(user_id)
             if user is None:
                 return error_response(ResultCodes.USER_NOT_FOUND)
             otp = UserRepo.get_user_last_otp(user)

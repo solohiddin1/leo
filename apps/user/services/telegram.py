@@ -10,6 +10,10 @@ from apps.user.repositories.telegram import TelegramRepo
 from apps.user.repositories.user_repo import UserRepo
 from apps.user.services.sms import SmsService
 
+from apps.shared.middleware.middleware import get_logger
+
+logger = get_logger()
+
 SUCCESS_MSG = "✅ Muvaffaqiyatli kirdingiz! Saytga qaytishingiz mumkin."
 SUCCESS_MSG_WITH_URL = "✅ Muvaffaqiyatli kirdingiz!\n\n👉 Saytga qaytish: {url}"
 NO_TOKEN_MSG = "Kirish uchun saytdagi «Telegram orqali kirish» tugmasini bosing."
@@ -147,6 +151,7 @@ class TgOtpService:
 
     @classmethod
     def _handle_contact(cls, chat_id, telegram_id, frm, contact):
+        logger.info(f"contact : {contact}, {contact.get('phone_number')} phone number")
         if contact.get("user_id") != telegram_id:
             TelegramClient.send_message(chat_id, WRONG_CONTACT_MSG)
             return
@@ -222,6 +227,7 @@ class TgOtpService:
     @classmethod
     def _link_or_create_user(cls, phone, telegram_id, frm):
         user = UserRepo.get_user_by_username(phone) if phone else None
+        logger.info(f"phone for creating telegram user {phone}, {telegram_id}, frm {frm.get("first_name")}, {frm.get("last_name")}")
         if not user:
             user = UserRepo.create_telegram_user(
                 username=phone or f"tg_{telegram_id}",

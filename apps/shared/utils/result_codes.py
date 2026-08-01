@@ -13,6 +13,8 @@ class ResultCodes(Enum):
     BANNER_NOT_FOUND = -9
     OTP_EXPIRED = -10
     OTP_ALREADY_USED = -11
+    PASSWORD_UPDATED_SUCCESS = 12
+    PASSWORD_UPDATED_FAILURE = 13
 
 ResultMessages = {
     "SUCCESS": {
