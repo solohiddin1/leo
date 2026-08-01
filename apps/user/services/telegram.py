@@ -82,7 +82,11 @@ class TgOtpService:
         TelegramRepo.set_telegram_id(row, telegram_id)
 
         if row.otp_mode:
-            user = UserRepo.get_user_by_telegram_id(telegram_id) or cls._link_or_create_user("", telegram_id, frm)
+            user = UserRepo.get_user_by_telegram_id(telegram_id)
+            if not user:
+                TelegramRepo.set_telegram_id(row, telegram_id)
+                TelegramClient.send_message(chat_id, ASK_PHONE_MSG, reply_markup=CONTACT_KEYBOARD)
+                return
             TelegramRepo.set_user(row, user)
             sent, result = SmsService.create_otp_for_user(user)
             if sent:
