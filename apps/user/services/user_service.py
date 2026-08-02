@@ -56,6 +56,9 @@ class UserService:
                 return error_response(ResultCodes.OTP_ALREADY_USED)
             if otp.expires_at < timezone.now():
                 return error_response(ResultCodes.OTP_EXPIRED)
+            otp.is_used = True
+            otp.is_verified = True
+            otp.save(update_fields=["is_used", "is_verified"])
             return otp
         except Exception:
             return error_response(ResultCodes.UNKNOWN_ERROR)

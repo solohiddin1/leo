@@ -13,8 +13,9 @@ class ResultCodes(Enum):
     BANNER_NOT_FOUND = -9
     OTP_EXPIRED = -10
     OTP_ALREADY_USED = -11
-    PASSWORD_UPDATED_SUCCESS = 12
-    PASSWORD_UPDATED_FAILURE = 13
+    OTP_NOT_FOUND = -12
+    PASSWORD_UPDATED_SUCCESS = -13
+    PASSWORD_UPDATED_FAILURE = -14
 
 ResultMessages = {
     "SUCCESS": {
@@ -76,5 +77,20 @@ ResultMessages = {
         "uz": "Kiritilgan kod allaqachon ishlatilgan.",
         "en": "OTP already used.",
         "ru": "OTP уже использован.",
+    },
+    "OTP_NOT_FOUND": {
+        "uz": "Kiritilgan kod topilmadi",
+        "en": "OTP not found.",
+        "ru": "OTP не найден"
+    },
+    "PASSWORD_UPDATED_SUCCESS": {
+        "uz": "Parol muvaffaqiyatli yangilandi.",
+        "en": "Password updated successfully.",
+        "ru": "Пароль успешно обновлен."
+    },
+    "PASSWORD_UPDATED_FAILURE": {
+        "uz": "Login yoki parol noto'g'ri.",
+        "en": "Incorrect login or password.",
+        "ru": "Неверный логин или пароль."
     },
 }
