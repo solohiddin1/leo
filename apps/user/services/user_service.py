@@ -39,6 +39,7 @@ class UserService:
     def set_user_password(user: User, password: str):
         user.set_password(password)
         user.save()
+
         return success_response(ResultCodes.PASSWORD_UPDATED_SUCCESS)
 
     @staticmethod
