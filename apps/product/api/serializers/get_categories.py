@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from apps.product.models import Category, SubCategory
 
-
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
