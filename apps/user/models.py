@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
 
+
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -27,6 +28,20 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
     telegram_username = models.CharField(max_length=100, blank=True, null=True)
     lang = models.CharField(max_length=5, blank=True, null=True)
     is_developer = models.BooleanField(default=False)
+    region = models.ForeignKey(
+        'shared.Region',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='users',
+    )
+    job = models.ForeignKey(
+        'Job',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='users',
+    )
 
     avatar = models.OneToOneField(
         Avatar,
@@ -78,6 +93,13 @@ class TelegramLoginToken(BaseModel):
 
     def __str__(self):
         return f"{self.token[:8]} {self.status}"
+
+
+class Job(BaseModel):
+    title = models.CharField(max_length=128)
+
+    def __str__(self):
+        return self.title
 
 
 class Device(BaseModel):

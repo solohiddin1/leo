@@ -5,7 +5,7 @@ from apps.user.models import User
 
 class ClientPermission(BasePermission):
     def has_permission(self, request, view):
-        if request.user is None:
+        if not request.user or not request.user.is_authenticated:
             return False
 
         db_user = User.objects.get(pk=request.user.id)

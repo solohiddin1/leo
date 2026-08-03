@@ -7,6 +7,7 @@ from apps.shared.utils.swagger import ProtectedSpectacularSwaggerView, Protected
 urlpatterns: list[URLPattern | URLResolver] = [
     path('api/v1/admin/', admin.site.urls),
     path('api/v1/user/', include('apps.user.urls')),
+    path('api/v1/product/', include('apps.product.urls')),
 ]
 
 if settings.DEBUG:

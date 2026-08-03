@@ -54,3 +54,4 @@ types-PyYAML==6.0.12.20260724
 typing_extensions==4.16.0
 uritemplate==4.2.0
 urllib3==2.7.0
+django-modeltranslation==0.20.3

@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from apps.user.models import User, Otp, TelegramLoginToken
+from apps.shared.security import GeneralThrottle
+from apps.user.models import User, Otp, TelegramLoginToken, Job
 
 
 @admin.register(User)
@@ -15,3 +16,8 @@ class OtpAdmin(admin.ModelAdmin):
 @admin.register(TelegramLoginToken)
 class TelegramLoginTokenAdmin(admin.ModelAdmin):
     list_display = ('user', 'token', 'status', 'created_at', 'updated_at')
+
+
+@admin.register(Job)
+class JobAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title')

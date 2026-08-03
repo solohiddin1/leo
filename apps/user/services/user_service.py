@@ -5,6 +5,7 @@ from apps.shared.utils.result_codes import ResultCodes
 from apps.user.models import User
 from apps.shared.utils.utils import success_response, error_response
 from apps.user.repositories.user_repo import UserRepo
+from apps.user.repositories.job_repo import JobRepo
 from apps.user.services.sms import SmsService
 from apps.order.repositories.cart_repo import CartRepo
 
@@ -63,6 +64,17 @@ class UserService:
             return otp
         except Exception:
             return error_response(ResultCodes.UNKNOWN_ERROR)
+
+    @staticmethod
+    def set_profile(user: User, data: dict):
+        job_id = data.get('job_id')
+        region_id = data.get('region_id')
+        if job_id is not None:
+            job = JobRepo.get_by_id(job_id)
+            if job is None:
+                return error_response(ResultCodes.JOB_NOT_FOUND)
+        UserRepo.update_profile(user, region_id, job_id)
+        return success_response(ResultCodes.PROFILE_UPDATED_SUCCESS)
 
     @staticmethod
     def token_for_user(user: User) -> dict:

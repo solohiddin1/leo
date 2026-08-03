@@ -16,6 +16,9 @@ class ResultCodes(Enum):
     OTP_NOT_FOUND = -12
     PASSWORD_UPDATED_SUCCESS = -13
     PASSWORD_UPDATED_FAILURE = -14
+    PROFILE_UPDATED_SUCCESS = -15
+    JOB_NOT_FOUND = -16
+    REGION_NOT_FOUND = -17
 
 ResultMessages = {
     "SUCCESS": {
@@ -92,5 +95,20 @@ ResultMessages = {
         "uz": "Login yoki parol noto'g'ri.",
         "en": "Incorrect login or password.",
         "ru": "Неверный логин или пароль."
+    },
+    "PROFILE_UPDATED_SUCCESS": {
+        "uz": "Profil muvaffaqiyatli yangilandi.",
+        "en": "Profile updated successfully.",
+        "ru": "Профиль успешно обновлён."
+    },
+    "JOB_NOT_FOUND": {
+        "uz": "Kasb topilmadi.",
+        "en": "Job not found.",
+        "ru": "Профессия не найдена."
+    },
+    "REGION_NOT_FOUND": {
+        "uz": "Hudud topilmadi.",
+        "en": "Region not found.",
+        "ru": "Регион не найден."
     },
 }

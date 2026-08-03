@@ -1,3 +1,4 @@
+from datetime import timedelta
 from os import getenv
 from pathlib import Path
 from dotenv import load_dotenv
@@ -18,6 +19,7 @@ ALLOWED_HOSTS = ['*']
 
 BASE = [
     'jazzmin',
+    'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -106,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'uz'
 
 TIME_ZONE = 'Asia/Tashkent'
 
@@ -140,6 +142,12 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '1000/day',  # no auth
         'user': '10000/day',  # with auth
@@ -149,6 +157,21 @@ REST_FRAMEWORK = {
         'general': '100/hour'
     },
 }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,
+}
+
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'uz'
+MODELTRANSLATION_LANGUAGES = ('uz', 'ru')
+MODELTRANSLATION_FALLBACK_LANGUAGES = ('uz', 'ru')
+
+LANGUAGES = (
+    ('uz', "O'zbekcha"),
+    ('ru', 'Русский'),
+)
 
 TELEGRAM_BOT_USERNAME = getenv('TELEGRAM_BOT_USERNAME')
 TELEGRAM_BOT_TOKEN = getenv('TELEGRAM_BOT_TOKEN')

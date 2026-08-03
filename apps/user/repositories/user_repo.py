@@ -38,3 +38,12 @@ class UserRepo:
     @staticmethod
     def get_user_by_id(user_id: int) -> User | None:
         return User.objects.filter(id=user_id).first()
+
+    @staticmethod
+    def update_profile(user: User, region_id: int | None, job_id: int | None) -> User:
+        if region_id is not None:
+            user.region_id = region_id
+        if job_id is not None:
+            user.job_id = job_id
+        user.save(update_fields=["region_id", "job_id"])
+        return user

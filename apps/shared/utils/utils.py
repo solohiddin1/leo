@@ -5,6 +5,18 @@ from apps.shared.utils.result_codes import ResultCodes, ResultMessages
 
 
 def success_response(result=None, status_code=status.HTTP_200_OK):
+    if isinstance(result, ResultCodes):
+        return Response({
+            "success": True,
+            "result": {
+                "code": result.value,
+                "message": ResultMessages[result.name]["en"],
+                "message_language": {
+                    "uz": ResultMessages[result.name]["uz"],
+                    "en": ResultMessages[result.name]["en"],
+                    "ru": ResultMessages[result.name]["ru"],
+                }
+        }}, status=status_code)
     return Response({
         "success": True,
         "result": result
