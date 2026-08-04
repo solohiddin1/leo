@@ -146,7 +146,13 @@ class TgOtpService:
         otp.is_used = True
         otp.is_verified = True
         otp.save(update_fields=["is_used", "is_verified"])
-        TelegramRepo.confirm(row, row.user)
+
+        user = row.user
+        if not user.is_verified:
+            user.is_verified = True
+            user.save(update_fields=["is_verified"])
+
+        TelegramRepo.confirm(row, user)
 
         from rest_framework_simplejwt.tokens import RefreshToken
         refresh = RefreshToken.for_user(row.user)
