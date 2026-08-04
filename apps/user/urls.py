@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from apps.user.api.views.job import JobsAPIView
 from apps.user.api.views.login import LoginAPIView
@@ -9,6 +10,7 @@ from apps.user.api.views.telegram_otp import TelegramOtpView, TelegramWebhookVie
 
 urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='index'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('telegram_otp_request/', TelegramOtpView.as_view(), name='telegram_otp'),
     path('telegram_webhook/', TelegramWebhookView.as_view(), name='telegram_webhook'),
     path('telegram_otp_poll/', TelegramOtpPollView.as_view(), name='telegram_otp_poll'),
