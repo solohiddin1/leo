@@ -8,6 +8,10 @@ class Region(BaseModel):
     name_uz = models.CharField(max_length=100, null=True)
     name_ru = models.CharField(max_length=100, blank=True, null=True)
     name_en = models.CharField(max_length=100, blank=True, null=True)
+    ordering = models.IntegerField(default=100)
+
+    class Meta:
+        ordering = ['ordering']
 
     def __str__(self):
         return self.name_uz
