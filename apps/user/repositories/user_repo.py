@@ -22,14 +22,13 @@ class UserRepo:
         return user
 
     @classmethod
-    def create_telegram_user(cls, username: str, first_name: str, last_name:str, phone_number:str) -> User | None:
+    def create_telegram_user(cls, username: str, first_name: str, last_name: str) -> User | None:
         from apps.order.repositories.cart_repo import CartRepo
         user, created = User.objects.get_or_create(
             username=username,
             defaults={
                 "first_name": first_name,
                 "last_name": last_name,
-                "phone_number": phone_number if phone_number else None
             }
         )
         CartRepo.get_or_create_cart(user)

@@ -7,7 +7,12 @@ from apps.user.models import Otp
 class SmsRepo:
     @staticmethod
     def create_otp(user, otp_code, expires_in_seconds) -> Otp:
-        return Otp.objects.create(user=user, code=otp_code, expires_at=timezone.now() + timedelta(seconds=expires_in_seconds))
+        return Otp.objects.create(
+            user=user,
+            code=otp_code,
+            phone_number=user.username or "",
+            expires_at=timezone.now() + timedelta(seconds=expires_in_seconds),
+        )
 
     @staticmethod
     def get_otp_of_user(user):

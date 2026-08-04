@@ -19,7 +19,6 @@ class Avatar(BaseModel):
 
 
 class User(AbstractUser, BaseModel, PermissionsMixin):
-    phone_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
     main_balance = models.FloatField(default=0)
     balance = models.BigIntegerField(default=0)
     is_verified = models.BooleanField(default=False)
@@ -51,7 +50,7 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
     )
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["phone_number"]
+    REQUIRED_FIELDS = []
 
 
 class Otp(BaseModel):

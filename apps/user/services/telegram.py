@@ -97,7 +97,10 @@ class TgOtpService:
 
         user = UserRepo.get_user_by_telegram_id(telegram_id)
         if user:
-            # TelegramRepo.confirm(row, user)
+            if not user.is_verified:
+                user.is_verified = True
+                user.save(update_fields=["is_verified"])
+            TelegramRepo.confirm(row, user)
             TelegramClient.send_message(chat_id, cls._success_msg(), reply_markup=REMOVE_KEYBOARD)
         else:
             TelegramClient.send_message(chat_id, ASK_PHONE_MSG, reply_markup=CONTACT_KEYBOARD)
@@ -177,7 +180,7 @@ class TgOtpService:
             if not sent:
                 TelegramClient.send_message(chat_id, OTP_TIME_LIMIT_MSG.format(seconds=result))
                 return
-            TelegramRepo.confirm(row, user)
+            TelegramRepo.set_user(row, user)
             TelegramClient.send_message(chat_id, cls._otp_msg(result))
         else:
             user.is_verified = True
@@ -231,14 +234,15 @@ class TgOtpService:
 
     @classmethod
     def _link_or_create_user(cls, phone, telegram_id, frm):
-        user = UserRepo.get_user_by_username(phone) if phone else None
-        logger.info(f"phone for creating telegram user {phone}, {telegram_id}, frm {frm.get("first_name")}, {frm.get("last_name")}")
+        user = None
+        if phone:
+            user = UserRepo.get_user_by_username(phone) or UserRepo.get_user_by_phone(phone)
+        logger.info(f"phone for creating telegram user {phone}, {telegram_id}, frm {frm.get('first_name')}, {frm.get('last_name')}")
         if not user:
             user = UserRepo.create_telegram_user(
                 username=phone or f"tg_{telegram_id}",
                 first_name=frm.get("first_name") or "",
                 last_name=frm.get("last_name") or "",
-                phone_number=phone or "",
             )
         UserRepo.attach_telegram(user, telegram_id, frm.get("username"))
         return user
