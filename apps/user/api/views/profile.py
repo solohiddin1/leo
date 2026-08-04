@@ -22,6 +22,7 @@ class ProfileUpdateAPIView(GenericAPIView):
     serializer_class = SetProfileSerializer
     throttle_classes = [GeneralThrottle]
 
+
     def patch(self, request, *args, **kwargs):
         instance = request.user
         serializer = self.get_serializer(instance, data=request.data, partial=True)
