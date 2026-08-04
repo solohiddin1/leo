@@ -7,6 +7,7 @@ from apps.user.api.views.profile import ProfileAPIView
 from apps.user.api.views.register import RegisterAPIView
 from apps.user.api.views.set_password import SetPasswordAPIView
 from apps.user.api.views.telegram_otp import TelegramOtpView, TelegramWebhookView, TelegramOtpPollView, TelegramOtpVerifyView
+from user.api.views.profile import ProfileUpdateAPIView
 
 urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='index'),
@@ -18,5 +19,6 @@ urlpatterns = [
     path('login/', LoginAPIView.as_view(), name='login'),
     path('set_password/', SetPasswordAPIView.as_view(), name='set_password'),
     path('profile/', ProfileAPIView.as_view(), name='profile'),
+    path('update_profile/', ProfileUpdateAPIView.as_view(), name='profile'),
     path('jobs/', JobsAPIView.as_view(), name='jobs'),
 ]

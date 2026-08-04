@@ -16,7 +16,15 @@ class ProfileAPIView(GenericAPIView):
         serializer = self.get_serializer(request.user)
         return success_response(serializer.data)
 
+
+class ProfileUpdateAPIView(GenericAPIView):
+    permission_classes = [ClientPermission]
+    serializer_class = SetProfileSerializer
+    throttle_classes = [GeneralThrottle]
+
     def patch(self, request, *args, **kwargs):
-        serializer = SetProfileSerializer(data=request.data)
+        instance = request.user
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        return UserService.set_profile(request.user, serializer.validated_data)
+        serializer.save()
+        return success_response(serializer.data)

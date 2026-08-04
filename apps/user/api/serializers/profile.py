@@ -12,6 +12,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'region_id', 'region_name', 'job_id', 'job_title']
 
 
-class SetProfileSerializer(serializers.Serializer):
-    region_id = serializers.IntegerField(required=False, allow_null=True)
-    job_id = serializers.IntegerField(required=False, allow_null=True)
+class SetProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'region', 'job']
+    # region_id = serializers.IntegerField(required=False, allow_null=True)
+    # job_id = serializers.IntegerField(required=False, allow_null=True)
