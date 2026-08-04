@@ -8,6 +8,7 @@ urlpatterns: list[URLPattern | URLResolver] = [
     path('api/v1/admin/', admin.site.urls),
     path('api/v1/user/', include('apps.user.urls')),
     path('api/v1/product/', include('apps.product.urls')),
+    path('api/v1/shared/', include('apps.shared.urls')),
 ]
 
 if settings.DEBUG:

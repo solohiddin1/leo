@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import AllowAny
 
-from apps.shared.permission.client import ClientPermission
 from apps.shared.security import GeneralThrottle
 from apps.shared.utils.utils import success_response
 from apps.product.api.serializers.get_categories import CategorySerializer
@@ -8,7 +8,7 @@ from apps.product.models import Category
 
 
 class GetCategoriesApiView(GenericAPIView):
-    permission_classes = [ClientPermission]
+    permission_classes = [AllowAny]
     serializer_class = CategorySerializer
     throttle_classes = [GeneralThrottle]
     queryset = Category.objects.all()
