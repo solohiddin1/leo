@@ -3,7 +3,7 @@ from django.db import models
 from apps.user.models import BaseModel
 
 
-class Region(BaseModel):
+class Region(models.Model):
     soato_id = models.IntegerField(unique=True, null=True)
     name_uz = models.CharField(max_length=100, null=True)
     name_ru = models.CharField(max_length=100, blank=True, null=True)
