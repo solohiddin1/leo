@@ -242,7 +242,7 @@ class TgOtpService:
     def _link_or_create_user(cls, phone, telegram_id, frm):
         user = None
         if phone:
-            user = UserRepo.get_user_by_username(phone) or UserRepo.get_user_by_phone(phone)
+            user = UserRepo.get_user_by_username(phone)
         logger.info(f"phone for creating telegram user {phone}, {telegram_id}, frm {frm.get('first_name')}, {frm.get('last_name')}")
         if not user:
             user = UserRepo.create_telegram_user(
