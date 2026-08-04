@@ -1,7 +1,7 @@
 [
   {
     "model": "shared.region",
-    "pk": 10,
+    "pk": 1,
     "fields": {
       "soato_id": 1726,
       "name_uz": "Toshkent shahri",
@@ -11,7 +11,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 1,
+    "pk": 2,
     "fields": {
       "soato_id": 1703,
       "name_uz": "Andijon viloyati",
@@ -21,7 +21,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 2,
+    "pk": 3,
     "fields": {
       "soato_id": 1706,
       "name_uz": "Buxoro viloyati",
@@ -31,7 +31,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 3,
+    "pk": 4,
     "fields": {
       "soato_id": 1708,
       "name_uz": "Jizzax viloyati",
@@ -41,7 +41,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 6,
+    "pk": 5,
     "fields": {
       "soato_id": 1714,
       "name_uz": "Namangan viloyati",
@@ -51,7 +51,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 5,
+    "pk": 6,
     "fields": {
       "soato_id": 1712,
       "name_uz": "Navoiy viloyati",
@@ -61,7 +61,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 4,
+    "pk": 7,
     "fields": {
       "soato_id": 1710,
       "name_uz": "Qashqadaryo viloyati",
@@ -71,7 +71,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 14,
+    "pk": 8,
     "fields": {
       "soato_id": 1735,
       "name_uz": "Qoraqalpog'iston Respublikasi",
@@ -81,7 +81,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 7,
+    "pk": 9,
     "fields": {
       "soato_id": 1718,
       "name_uz": "Samarqand viloyati",
@@ -91,7 +91,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 9,
+    "pk": 10,
     "fields": {
       "soato_id": 1724,
       "name_uz": "Sirdaryo viloyati",
@@ -101,7 +101,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 8,
+    "pk": 11,
     "fields": {
       "soato_id": 1722,
       "name_uz": "Surxondaryo viloyati",
@@ -111,7 +111,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 11,
+    "pk": 12,
     "fields": {
       "soato_id": 1727,
       "name_uz": "Toshkent viloyati",
@@ -121,7 +121,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 12,
+    "pk": 13,
     "fields": {
       "soato_id": 1730,
       "name_uz": "Farg'ona viloyati",
@@ -131,7 +131,7 @@
   },
   {
     "model": "shared.region",
-    "pk": 13,
+    "pk": 14,
     "fields": {
       "soato_id": 1733,
       "name_uz": "Xorazm viloyati",
