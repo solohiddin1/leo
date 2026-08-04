@@ -180,8 +180,7 @@ class TgOtpService:
         phone = cls._normalize_phone(contact.get("phone_number") or "")
         user = cls._link_or_create_user(phone, telegram_id, frm)
 
-        config = SiteConfig.objects.first()
-        if config and config.send_otp_code:
+        if row.otp_mode:
             sent, result = SmsService.create_otp_for_user(user)
             if not sent:
                 TelegramClient.send_message(chat_id, OTP_TIME_LIMIT_MSG.format(seconds=result))
