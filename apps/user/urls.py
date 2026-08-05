@@ -8,6 +8,7 @@ from apps.user.api.views.register import RegisterAPIView
 from apps.user.api.views.set_password import SetPasswordAPIView
 from apps.user.api.views.telegram_otp import TelegramOtpView, TelegramWebhookView, TelegramOtpPollView, TelegramOtpVerifyView
 from apps.user.api.views.profile import ProfileUpdateAPIView
+from user.api.views.logout import LogoutAPIView
 
 urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='index'),
@@ -17,6 +18,7 @@ urlpatterns = [
     path('telegram_otp_poll/', TelegramOtpPollView.as_view(), name='telegram_otp_poll'),
     path('telegram_otp_verify/', TelegramOtpVerifyView.as_view(), name='telegram_otp_verify'),
     path('login/', LoginAPIView.as_view(), name='login'),
+    path('logout/', LogoutAPIView.as_view(), name='logout'),
     path('set_password/', SetPasswordAPIView.as_view(), name='set_password'),
     path('profile/', ProfileAPIView.as_view(), name='profile'),
     path('update_profile/', ProfileUpdateAPIView.as_view(), name='profile'),

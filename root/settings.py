@@ -31,6 +31,7 @@ BASE = [
 LIBS = [
     'rest_framework',
     'drf_spectacular',
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 APPS = [
@@ -176,21 +177,22 @@ CACHES = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': False,
+    'ROTATE_REFRESH_TOKENS': True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
-PASSWORD_HASHERS = {
+PASSWORD_HASHERS = [
     "apps.shared.security.TunedArgon2Hasher",
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     # "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
-}
+]
 
-LOGGING = {
-    "version": 1,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "loggers": {"django.db.backends": {"handlers": ["console"], "level": "DEBUG"}},
-}
+# LOGGING = {
+#     "version": 1,
+#     "handlers": {"console": {"class": "logging.StreamHandler"}},
+#     "loggers": {"django.db.backends": {"handlers": ["console"], "level": "DEBUG"}},
+# }
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'uz'
 MODELTRANSLATION_LANGUAGES = ('uz', 'ru')

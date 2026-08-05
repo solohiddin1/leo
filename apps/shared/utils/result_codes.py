@@ -20,6 +20,7 @@ class ResultCodes(Enum):
     JOB_NOT_FOUND = -16
     REGION_NOT_FOUND = -17
     TOO_MANY_REQUESTS = -18
+    INVALID_TOKEN_ERROR = -19
 
 ResultMessages = {
     "SUCCESS": {
@@ -116,5 +117,10 @@ ResultMessages = {
         "uz": "Juda ko'p urinish. {wait} soniyadan keyin qayta urinib ko'ring.",
         "en": "Too many attempts. Try again in {wait} sec.",
         "ru": "Слишком много попыток. Повторите попытку через {wait} сек.",
+    },
+    "INVALID_TOKEN_ERROR": {
+        "uz": "Token yaroqsiz yoki muddati tugagan. Qaytadan tizimga kiring.",
+        "en": "Invalid or expired token. Please sign in again.",
+        "ru": "Токен недействителен или истёк. Войдите в систему заново.",
     },
 }
