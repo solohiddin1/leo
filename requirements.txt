@@ -56,3 +56,4 @@ uritemplate==4.2.0
 urllib3==2.7.0
 django-modeltranslation==0.20.3
 django-redis==7.0.0
+argon2-cffi==25.1.0
