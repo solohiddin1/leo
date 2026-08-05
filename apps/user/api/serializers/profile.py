@@ -1,20 +1,36 @@
 from rest_framework import serializers
 
 from apps.user.models import User
+from user.api.serializers.job import JobSerializer
+from user.api.serializers.region import RegionSerializer
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    job_title = serializers.CharField(source='job.title', read_only=True, allow_null=True)
-    region_name = serializers.CharField(source='region.name_uz', read_only=True, allow_null=True)
+    job = JobSerializer()
+    region = RegionSerializer()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'region_id', 'region_name', 'job_id', 'job_title']
+        fields = [
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'main_balance',
+            'balance',
+            'telegram_username',
+            'lang',
+            'region',
+            'job',
+          ]
 
 
 class SetProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'region', 'job']
-    # region_id = serializers.IntegerField(required=False, allow_null=True)
-    # job_id = serializers.IntegerField(required=False, allow_null=True)
+        fields = [
+            'first_name',
+            'last_name',
+            'region',
+            'job',
+        ]

@@ -4,7 +4,6 @@ from apps.shared.permission.client import ClientPermission
 from apps.shared.security import GeneralThrottle
 from apps.shared.utils.utils import success_response
 from apps.user.api.serializers.profile import ProfileSerializer, SetProfileSerializer
-from apps.user.services.user_service import UserService
 
 
 class ProfileAPIView(GenericAPIView):

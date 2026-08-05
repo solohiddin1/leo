@@ -1,6 +1,6 @@
 from django.contrib import admin
+from modeltranslation.admin import TabbedTranslationAdmin
 
-from apps.shared.security import GeneralThrottle
 from apps.user.models import User, Otp, TelegramLoginToken, Job
 
 
@@ -19,5 +19,5 @@ class TelegramLoginTokenAdmin(admin.ModelAdmin):
 
 
 @admin.register(Job)
-class JobAdmin(admin.ModelAdmin):
+class JobAdmin(TabbedTranslationAdmin):
     list_display = ('id', 'title')

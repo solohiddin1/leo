@@ -19,13 +19,18 @@ class Avatar(BaseModel):
 
 
 class User(AbstractUser, BaseModel, PermissionsMixin):
+    LANG_CHOICES = (
+        ("uz", "Uzbek"),
+        ("ru", "Russian"),
+
+    )
     main_balance = models.FloatField(default=0)
     balance = models.BigIntegerField(default=0)
     is_verified = models.BooleanField(default=False)
     otp_sent_count = models.IntegerField(default=0)
     telegram_id = models.CharField(max_length=20, blank=True, null=True)
     telegram_username = models.CharField(max_length=100, blank=True, null=True)
-    lang = models.CharField(max_length=5, blank=True, null=True)
+    lang = models.CharField(choices=LANG_CHOICES, max_length=5, blank=True, null=True)
     is_developer = models.BooleanField(default=False)
     region = models.ForeignKey(
         'shared.Region',
@@ -51,6 +56,9 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
+
+    def __str__(self) -> str:
+        return f"{self.username}-{self.first_name} {self.last_name}"
 
 
 class Otp(BaseModel):

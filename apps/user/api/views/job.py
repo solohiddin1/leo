@@ -10,8 +10,9 @@ from apps.user.services.job_service import JobService
 class JobsAPIView(GenericAPIView):
     permission_classes = [AllowAny]
     throttle_classes = [GeneralThrottle]
+    serializer_class = JobSerializer
 
     def get(self, request, *args, **kwargs):
         jobs = JobService.get_all_jobs()
-        serializer = JobSerializer(jobs, many=True)
+        serializer = self.get_serializer(jobs, many=True)
         return success_response(serializer.data)

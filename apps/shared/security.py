@@ -7,4 +7,4 @@ class GeneralThrottle(AnonRateThrottle):
     def __init__(self):
         super().__init__()
         self.num_requests = 3
-        self.duration = 300
+        self.duration = 10
