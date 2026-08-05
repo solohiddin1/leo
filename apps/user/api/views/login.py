@@ -1,6 +1,5 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
-
 from apps.shared.security import GeneralThrottle
 from apps.user.api.serializers.login import LoginSerializer
 from apps.user.models import User
@@ -16,6 +15,6 @@ class LoginAPIView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.data.get('username')
-        password = serializer.data.get('password')
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
         return UserService.login(username, password)

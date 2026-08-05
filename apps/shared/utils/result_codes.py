@@ -19,6 +19,7 @@ class ResultCodes(Enum):
     PROFILE_UPDATED_SUCCESS = -15
     JOB_NOT_FOUND = -16
     REGION_NOT_FOUND = -17
+    TOO_MANY_REQUESTS = -18
 
 ResultMessages = {
     "SUCCESS": {
@@ -110,5 +111,10 @@ ResultMessages = {
         "uz": "Hudud topilmadi.",
         "en": "Region not found.",
         "ru": "Регион не найден."
+    },
+    "TOO_MANY_REQUESTS": {
+        "uz": "Juda ko'p urinish. {wait} soniyadan keyin qayta urinib ko'ring.",
+        "en": "Too many attempts. Try again in {wait} sec.",
+        "ru": "Слишком много попыток. Повторите попытку через {wait} сек.",
     },
 }
