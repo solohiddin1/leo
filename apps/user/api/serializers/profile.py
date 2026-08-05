@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 from apps.user.models import User
-from user.api.serializers.job import JobSerializer
-from user.api.serializers.region import RegionSerializer
+from apps.user.api.serializers.job import JobSerializer
+from apps.user.api.serializers.region import RegionSerializer
 
 
 class ProfileSerializer(serializers.ModelSerializer):
