@@ -5,9 +5,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from apps.user.models import User
 from apps.shared.security import GeneralThrottle
 from apps.user.api.serializers.logout import LogoutSerializer
-from shared.permission.client import ClientPermission
-from shared.utils.result_codes import ResultCodes
-from shared.utils.utils import error_response, success_response
+from apps.shared.permission.client import ClientPermission
+from apps.shared.utils.result_codes import ResultCodes
+from apps.shared.utils.utils import error_response, success_response
 
 
 class LogoutAPIView(GenericAPIView):
