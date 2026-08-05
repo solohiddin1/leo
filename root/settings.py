@@ -185,6 +185,13 @@ PASSWORD_HASHERS = {
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     # "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
 }
+
+LOGGING = {
+    "version": 1,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {"django.db.backends": {"handlers": ["console"], "level": "DEBUG"}},
+}
+
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'uz'
 MODELTRANSLATION_LANGUAGES = ('uz', 'ru')
 MODELTRANSLATION_FALLBACK_LANGUAGES = ('uz', 'ru')
