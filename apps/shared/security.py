@@ -2,9 +2,9 @@ from rest_framework.throttling import AnonRateThrottle
 from django.contrib.auth.hashers import Argon2PasswordHasher
 
 class TunedArgon2Hasher(Argon2PasswordHasher):
-    memory_cost = 65536
+    memory_cost = 46080
     parallelism = 2
-    time_cost = 3
+    time_cost = 2
 
 class GeneralThrottle(AnonRateThrottle):
     scope = 'general'
