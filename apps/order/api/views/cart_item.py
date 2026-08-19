@@ -16,6 +16,7 @@ class CartItemAddView(GenericAPIView):
             user=request.user,
             product_id=serializer.validated_data["product_id"],
             quantity=serializer.validated_data["quantity"],
+            request=request,
         )
 
 
@@ -30,7 +31,8 @@ class CartItemView(GenericAPIView):
             user=request.user,
             item_id=item_id,
             quantity=serializer.validated_data["quantity"],
+            request=request,
         )
 
     def delete(self, request, item_id: int, *args, **kwargs):
-        return CartService.remove_from_cart(request.user, item_id)
+        return CartService.remove_from_cart(request.user, item_id, request)

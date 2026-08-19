@@ -16,33 +16,33 @@ class CartService:
         return success_response(serialized)
 
     @staticmethod
-    def add_to_cart(user: User, product_id: int, quantity: int):
+    def add_to_cart(user: User, product_id: int, quantity: int, request: Request):
         quantity = max(quantity, 1)
         product = ProductRepo.get_by_id(product_id)
         if product is None:
             return error_response(ResultCodes.PRODUCT_NOT_FOUND)
         cart = CartRepo.get_or_create_cart(user)
         CartRepo.add_item(cart, product, quantity)
-        return success_response(ResultCodes.SUCCESS)
+        return success_response(CartSerializer(cart, context={'request': request}).data)
 
     @staticmethod
-    def update_cart_item(user: User, item_id: int, quantity: int):
+    def update_cart_item(user: User, item_id: int, quantity: int, request: Request):
         quantity = max(quantity, 1)
         cart = CartRepo.get_or_create_cart(user)
         item = CartRepo.get_cart_item_by_id(cart, item_id)
         if item is None:
             return error_response(ResultCodes.CART_ITEM_NOT_FOUND)
         CartRepo.update_item(item, quantity)
-        return success_response(ResultCodes.SUCCESS)
+        return success_response(CartSerializer(cart, context={'request': request}).data)
 
     @staticmethod
-    def remove_from_cart(user: User, item_id: int):
+    def remove_from_cart(user: User, item_id: int, request: Request):
         cart = CartRepo.get_or_create_cart(user)
         item = CartRepo.get_cart_item_by_id(cart, item_id)
         if item is None:
             return error_response(ResultCodes.CART_ITEM_NOT_FOUND)
         CartRepo.remove_item(item)
-        return success_response(ResultCodes.SUCCESS)
+        return success_response(CartSerializer(cart, context={'request': request}).data)
 
     @staticmethod
     def clear_cart(user: User):
