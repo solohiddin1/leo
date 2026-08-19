@@ -25,13 +25,15 @@ class OrderService:
 
     @staticmethod
     def create_order(user: User, request: Request):
-        cart_id = request.data.get('cart_item_id')
-        cart = CartRepo.get_cart_by_id(cart_id, request.user)
-        if cart is None:
-            return error_response(ResultCodes.CART_NOT_FOUND)
-        order = OrderRepo.create_order_from_cart(user, cart)
-        if order is None:
+        item_ids = request.data.get('cart_item_ids', [])
+        if not item_ids:
             return error_response(ResultCodes.CART_EMPTY)
 
+        cart = CartRepo.get_or_create_cart(user)
+        cart_items = CartRepo.get_cart_items_by_ids(cart, item_ids)
+        if not cart_items.exists():
+            return error_response(ResultCodes.CART_ITEM_NOT_FOUND)
+
+        order = OrderRepo.create_order_from_items(user, cart_items)
         serialized = OrderSerializer(order, context={'request': request}).data
         return success_response(serialized)

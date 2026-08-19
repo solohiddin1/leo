@@ -6,6 +6,14 @@ from apps.shared.models import Store
 from apps.user.models import BaseModel, User
 
 
+class OrderState(models.TextChoices):
+    CHECKING = "checking", "Checking"
+    ACCEPTED = "accepted", "Accepted"
+    ON_WAY = "on_way", "On Way"
+    COMPLETED = "completed", "Completed"
+    CANCELLED = "cancelled", "Cancelled"
+
+
 class Order(BaseModel):
     total_price = models.BigIntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
@@ -14,6 +22,11 @@ class Order(BaseModel):
     )
     total = models.IntegerField(default=1, verbose_name="общая сумма")
     is_completed = models.BooleanField(default=False)
+    state = models.CharField(
+        max_length=20,
+        choices=OrderState.choices,
+        default=OrderState.CHECKING,
+    )
 
     def __str__(self):
         return f"Order #{self.pk}"

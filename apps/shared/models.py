@@ -5,9 +5,9 @@ from apps.user.models import BaseModel
 
 class Region(models.Model):
     soato_id = models.IntegerField(unique=True, null=True)
-    name_uz = models.CharField(max_length=100, null=True)
-    name_ru = models.CharField(max_length=100, blank=True, null=True)
-    name_en = models.CharField(max_length=100, blank=True, null=True)
+    name_uz = models.CharField(max_length=100, default="")
+    name_ru = models.CharField(max_length=100, blank=True, default="")
+    name_en = models.CharField(max_length=100, blank=True, default="")
     ordering = models.IntegerField(default=100)
 
     class Meta:

@@ -29,6 +29,10 @@ class CartRepo:
         return cart.items.filter(id=item_id).first()
 
     @staticmethod
+    def get_cart_items_by_ids(cart: Cart, item_ids: list[int]) -> QuerySet[CartItem]:
+        return cart.items.filter(id__in=item_ids).select_related("product")
+
+    @staticmethod
     def add_item(cart: Cart, product: Product, quantity: int) -> CartItem:
         item, created = CartItem.objects.get_or_create(
             cart=cart,

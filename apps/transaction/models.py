@@ -9,12 +9,12 @@ class Bonus(models.Model):
     code = models.CharField(max_length=100, unique=True, verbose_name="Код")
     summa = models.IntegerField(default=1, verbose_name="Сумма", blank=True, null=True)
 
-    def __str__(self):
-        return self.code
-
     class Meta:
         verbose_name = 'Bonus'
         verbose_name_plural = 'Bonuses'
+
+    def __str__(self):
+        return self.code
 
 
 class UserSumma(models.Model):

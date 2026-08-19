@@ -12,7 +12,7 @@ def image_preview(self, obj):
     if not image:
         return "-"
     return format_html(
-        '<img src="{}" style="max-height:60px; max-width:60px; object-fit:cover;" />',
+        '<img src="{}" style="max-height:150px; max-width:150px; object-fit:cover;" />',
         image.url,
     )
 
@@ -64,8 +64,8 @@ class SubCategoryAdmin(TabbedTranslationAdmin):
 
 @admin.register(Product)
 class ProductAdmin(TabbedTranslationAdmin):
-    list_display = ("id", "name_uz", "name_ru", "price", "bonus_price", "category", "is_active", "image_preview")
+    list_display = ("id", "name_uz", "name_ru", "price", "bonus_price", "category",
+                    "is_active", "image_preview")
     list_filter = ("is_active", "category")
-    image_preview = image_preview
     inlines = [ImageInline]
     image_preview = image_preview_for_product

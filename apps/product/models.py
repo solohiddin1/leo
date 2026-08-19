@@ -20,7 +20,8 @@ class SubCategory(BaseModel):
     )
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True)
     image = models.ImageField(upload_to="subcategories/", null=True, blank=True)
-    image_compressed = models.ImageField(upload_to="subcategories/compressed/", null=True, blank=True)
+    image_compressed = models.ImageField(upload_to="subcategories/compressed/",
+                                         null=True, blank=True)
 
     def __str__(self):
         return self.name
