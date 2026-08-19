@@ -1,8 +1,10 @@
 import time
 import traceback
+
 import requests
-from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.management.base import BaseCommand
+
 from apps.user.services.telegram import TgOtpService
 
 
@@ -14,7 +16,9 @@ class Command(BaseCommand):
         url = f"https://api.telegram.org/bot{token}"
         offset = None
 
-        resp = requests.post(f"{url}/deleteWebhook", json={"drop_pending_updates": True})
+        resp = requests.post(
+            f"{url}/deleteWebhook", json={"drop_pending_updates": True}
+        )
         result = resp.json()
         if not result.get("ok"):
             self.stderr.write(f"deleteWebhook failed: {result}")

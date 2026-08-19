@@ -22,7 +22,6 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
     LANG_CHOICES = (
         ("uz", "Uzbek"),
         ("ru", "Russian"),
-
     )
     main_balance = models.FloatField(default=0)
     balance = models.BigIntegerField(default=0)
@@ -33,18 +32,18 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
     lang = models.CharField(choices=LANG_CHOICES, max_length=5, blank=True, null=True)
     is_developer = models.BooleanField(default=False)
     region = models.ForeignKey(
-        'shared.Region',
+        "shared.Region",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='users',
+        related_name="users",
     )
     job = models.ForeignKey(
-        'Job',
+        "Job",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='users',
+        related_name="users",
     )
 
     avatar = models.OneToOneField(
@@ -74,9 +73,8 @@ class Otp(BaseModel):
         return f"{self.code}-{self.phone_number}"
 
     class Meta:
-        indexes = [
-            models.Index(fields=["user"])
-        ]
+        indexes = [models.Index(fields=["user"])]
+
 
 class TelegramLoginToken(BaseModel):
     STATUS_CHOICES = (
@@ -116,7 +114,9 @@ class Device(BaseModel):
         ("WEB", "WEB"),
     )
     name = models.CharField(max_length=128)
-    device_type = models.CharField(max_length=16, choices=DEVICE_TYPE_CHOICES, default="WEB")
+    device_type = models.CharField(
+        max_length=16, choices=DEVICE_TYPE_CHOICES, default="WEB"
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -124,5 +124,5 @@ class Device(BaseModel):
         related_name="user_device",
     )
     device_id = models.CharField(max_length=128)
-    fcm_token = models.CharField(max_length=128, null=True, blank=True)
+    fcm_token = models.CharField(max_length=128, blank=True, default=True)
     is_active = models.BooleanField(default=True)

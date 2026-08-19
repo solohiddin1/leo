@@ -1,7 +1,7 @@
 import datetime
+import json
 import logging
 import os
-import json
 from threading import Lock
 
 from django.utils.deprecation import MiddlewareMixin
@@ -20,7 +20,7 @@ class DailyFileHandler(logging.FileHandler):
 
     def __init__(self):
         self._log_date = datetime.date.today()
-        super().__init__(self._dated_path(self._log_date), encoding='utf-8')
+        super().__init__(self._dated_path(self._log_date), encoding="utf-8")
 
     @staticmethod
     def _dated_path(date: datetime.date) -> str:
@@ -40,9 +40,9 @@ class DailyFileHandler(logging.FileHandler):
         cutoff = datetime.date.today() - datetime.timedelta(days=self.KEEP_DAYS)
         try:
             for fname in os.listdir(LOG_DIR):
-                if not fname.endswith('.log'):
+                if not fname.endswith(".log"):
                     continue
-                date_part = fname[:-len('.log')]
+                date_part = fname[: -len(".log")]
                 try:
                     if datetime.date.fromisoformat(date_part) < cutoff:
                         os.remove(os.path.join(LOG_DIR, fname))
@@ -51,7 +51,17 @@ class DailyFileHandler(logging.FileHandler):
         except Exception:
             pass
 
-SENSITIVE_KEYS = {"password", "token", "access", "refresh", "authorization", "otp", "secret"}
+
+SENSITIVE_KEYS = {
+    "password",
+    "token",
+    "access",
+    "refresh",
+    "authorization",
+    "otp",
+    "secret",
+}
+
 
 def redact_body(body: str) -> str:
     try:
@@ -71,6 +81,7 @@ def redact_body(body: str) -> str:
 
     return json.dumps(_redact(data))
 
+
 def get_logger():
     """Thread-safe singleton logger"""
     global _logger
@@ -83,7 +94,9 @@ def get_logger():
             _logger.propagate = False
 
             handler = DailyFileHandler()
-            formatter = logging.Formatter("[{asctime}] {levelname} {message}", style="{")
+            formatter = logging.Formatter(
+                "[{asctime}] {levelname} {message}", style="{"
+            )
             handler.setFormatter(formatter)
             _logger.addHandler(handler)
 
@@ -91,24 +104,28 @@ def get_logger():
 
 
 def is_swagger_request(path: str) -> bool:
-    return any([
-        path.startswith("/swagger"),
-        path.startswith("/redoc"),
-        path.startswith("/openapi"),  # for drf-spectacular
-    ])
+    return any(
+        [
+            path.startswith("/swagger"),
+            path.startswith("/redoc"),
+            path.startswith("/openapi"),  # for drf-spectacular
+        ]
+    )
 
 
 def should_skip_logging(path: str) -> bool:
-    return any([
-        path.startswith("/api/v1/swagger"),
-        path.startswith("/api/v1/redoc"),
-        path.startswith("/api/v1/media/"),
-        path.startswith("/api/v1/admin/"),
-        path.startswith("/api/v1/user/login/"),
-        path.startswith("/api/v1/user/set_password/"),
-        path.startswith("/api/v1/static/"),
-        path.startswith("/api/v1/favicon.ico")
-    ])
+    return any(
+        [
+            path.startswith("/api/v1/swagger"),
+            path.startswith("/api/v1/redoc"),
+            path.startswith("/api/v1/media/"),
+            path.startswith("/api/v1/admin/"),
+            path.startswith("/api/v1/user/login/"),
+            path.startswith("/api/v1/user/set_password/"),
+            path.startswith("/api/v1/static/"),
+            path.startswith("/api/v1/favicon.ico"),
+        ]
+    )
 
 
 class ExceptionMiddleware(MiddlewareMixin):
@@ -116,11 +133,11 @@ class ExceptionMiddleware(MiddlewareMixin):
 
     def process_exception(self, request, exception):
         if is_swagger_request(request.path):
-            return None  # skip swagger errors
+            return  # skip swagger errors
 
         logger = get_logger()
         logger.exception(exception)
-        return None
+        return
 
 
 class RequestResponseLoggingMiddleware(MiddlewareMixin):
@@ -128,7 +145,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         if should_skip_logging(request.path):
-            return None
+            return
 
         logger = get_logger()
         try:
@@ -137,7 +154,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
             body = "<unreadable body>"
 
         if len(body) > self.MAX_LOG_LENGTH:
-            body = body[:self.MAX_LOG_LENGTH] + "... [truncated]"
+            body = body[: self.MAX_LOG_LENGTH] + "... [truncated]"
 
         logger.info(
             f"REQUEST | {request.method} {request.get_full_path()} | Body: {body}"
@@ -159,7 +176,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
                 content = "<unreadable content>"
 
             if len(content) > self.MAX_LOG_LENGTH:
-                content = content[:self.MAX_LOG_LENGTH] + "... [truncated]"
+                content = content[: self.MAX_LOG_LENGTH] + "... [truncated]"
 
         logger.info(
             f"RESPONSE | {request.method} {request.get_full_path()} | "

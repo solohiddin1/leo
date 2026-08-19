@@ -1,7 +1,7 @@
-from apps.user.models import User, Otp
+from apps.user.models import Otp, User
+
 
 class UserRepo:
-
     @staticmethod
     def get_user_by_username(username: str) -> User | None:
         return User.objects.filter(username=username).first()
@@ -22,14 +22,17 @@ class UserRepo:
         return user
 
     @classmethod
-    def create_telegram_user(cls, username: str, first_name: str, last_name: str) -> User | None:
+    def create_telegram_user(
+        cls, username: str, first_name: str, last_name: str
+    ) -> User | None:
         from apps.order.repositories.cart_repo import CartRepo
+
         user, created = User.objects.get_or_create(
             username=username,
             defaults={
                 "first_name": first_name,
                 "last_name": last_name,
-            }
+            },
         )
         CartRepo.get_or_create_cart(user)
         return user

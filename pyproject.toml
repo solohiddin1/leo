@@ -1,5 +1,9 @@
+[tool.ruff]
+line-length = 100
+
 [tool.ruff.lint]
-extend-select = ["N", "DJ", "E", "F", "W", "I", "UP", "B"]  # merged, single table
+extend-select = ["N", "DJ", "E", "F", "W", "UP", "B"]  # merged, single table
+ignore = ["RUF012"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/migrations/*.py" = ["E501", "RUF012"]
@@ -16,3 +20,4 @@ check_untyped_defs = true
 
 [tool.django-stubs]
 django_settings_module = "root.settings"
+

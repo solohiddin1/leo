@@ -5,9 +5,9 @@ from apps.order.models import Order, OrderItem
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'total_price', 'filial')
+    list_display = ("id", "user", "total_price", "store")
 
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order', 'user', 'product', 'price', 'quantity')
+    list_display = ("id", "order", "user", "product", "price", "quantity")

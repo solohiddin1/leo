@@ -11,16 +11,18 @@ class Region(models.Model):
     ordering = models.IntegerField(default=100)
 
     class Meta:
-        ordering = ['ordering']
+        ordering = ["ordering"]
 
     def __str__(self):
         return self.name_uz
 
 
-class Filial(BaseModel):
+class Store(BaseModel):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=500, blank=True)
-    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True, related_name='filials')
+    region = models.ForeignKey(
+        Region, on_delete=models.SET_NULL, null=True, blank=True, related_name="filials"
+    )
     phone_number = models.CharField(max_length=20, blank=True)
     lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     long = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -35,4 +37,21 @@ class SiteConfig(BaseModel):
     otp_timeout_seconds = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.send_otp_code}-{self.otp_wait_seconds}-{self.otp_timeout_seconds}"
+        return (
+            f"{self.send_otp_code}-{self.otp_wait_seconds}-{self.otp_timeout_seconds}"
+        )
+
+
+class Banner(BaseModel):
+    name = models.CharField(max_length=255)
+    image = models.ImageField(upload_to="banners/", null=True, blank=True)
+    image_compressed = models.ImageField(upload_to="banners/compressed/", null=True, blank=True)
+    url = models.CharField(max_length=500, blank=True)
+    ordering = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["ordering"]
+
+    def __str__(self):
+        return self.name

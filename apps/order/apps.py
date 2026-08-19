@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class OrderConfig(AppConfig):
-    name = 'apps.order'
-    label = 'order'
+    name = "apps.order"
+    label = "order"

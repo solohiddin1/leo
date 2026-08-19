@@ -2,7 +2,6 @@ from apps.user.models import Job
 
 
 class JobRepo:
-
     @staticmethod
     def get_all():
         return Job.objects.all()

@@ -1,87 +1,85 @@
 from datetime import timedelta
 from os import getenv
 from pathlib import Path
+
 from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = getenv('SECRET_KEY')
+SECRET_KEY = getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'True'
+DEBUG = "True"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 BASE = [
-    'jazzmin',
-    'modeltranslation',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "jazzmin",
+    "modeltranslation",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
 ]
 
-LIBS = [
-    'rest_framework',
-    'drf_spectacular',
-    'rest_framework_simplejwt.token_blacklist'
-]
+LIBS = ["rest_framework", "drf_spectacular", "rest_framework_simplejwt.token_blacklist"]
 
 APPS = [
-    'apps.user',
-    'apps.shared',
-    'apps.product',
-    'apps.order',
+    "apps.user",
+    "apps.shared",
+    "apps.product",
+    "apps.order",
+    "apps.transaction",
 ]
 
 INSTALLED_APPS = BASE + LIBS + APPS
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.shared.middleware.middleware.RequestResponseLoggingMiddleware'
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.shared.middleware.middleware.RequestResponseLoggingMiddleware",
 ]
 
-ROOT_URLCONF = 'root.urls'
+ROOT_URLCONF = "root.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'root.wsgi.application'
+WSGI_APPLICATION = "root.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
         "OPTIONS": {
             "timeout": 20,
             "init_command": (
@@ -93,23 +91,23 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = "user.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -117,9 +115,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'uz'
+LANGUAGE_CODE = "uz"
 
-TIME_ZONE = 'Asia/Tashkent'
+TIME_ZONE = "Asia/Tashkent"
 
 USE_I18N = True
 
@@ -129,55 +127,55 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
-MEDIA_ROOT = BASE_DIR / 'media'
-MEDIA_URL = '/media/'
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static"
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Leo API',
-    'VERSION': '1.0.0',
-    'DESCRIPTION': 'Leo API documentation',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "Leo API",
+    "VERSION": "1.0.0",
+    "DESCRIPTION": "Leo API documentation",
+    "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_SETTINGS": {
         "tagsSorter": "none",
         "operationsSorter": "none",
-    }
+    },
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.shared.core.exceptions.custom_exception_handler",
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '1000/day',  # no auth
-        'user': '10000/day',  # with auth
-        'dashboard_auth': '3/5min',
-        'otp': '5/hour',
-        'login': '10/hour',
-        'general': '100/hour'
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "1000/day",  # no auth
+        "user": "10000/day",  # with auth
+        "dashboard_auth": "3/5min",
+        "otp": "5/hour",
+        "login": "10/hour",
+        "general": "100/hour",
     },
 }
 
 CACHES = {
     "default": {
-            "BACKEND": "django.core.cache.backends.redis.RedisCache",
-            "LOCATION": "redis://127.0.0.1:6379/1",
-        }
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
@@ -194,16 +192,18 @@ PASSWORD_HASHERS = [
 #     "loggers": {"django.db.backends": {"handlers": ["console"], "level": "DEBUG"}},
 # }
 
-MODELTRANSLATION_DEFAULT_LANGUAGE = 'uz'
-MODELTRANSLATION_LANGUAGES = ('uz', 'ru')
-MODELTRANSLATION_FALLBACK_LANGUAGES = ('uz', 'ru')
+MODELTRANSLATION_DEFAULT_LANGUAGE = "uz"
+MODELTRANSLATION_LANGUAGES = ("uz", "ru")
+MODELTRANSLATION_FALLBACK_LANGUAGES = ("uz", "ru")
 
 LANGUAGES = (
-    ('uz', "O'zbekcha"),
-    ('ru', 'Русский'),
+    ("uz", "O'zbekcha"),
+    ("ru", "Русский"),
 )
 
-TELEGRAM_BOT_USERNAME = getenv('TELEGRAM_BOT_USERNAME')
-TELEGRAM_BOT_TOKEN = getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_LOGIN_TOKEN_TTL_MINUTES = int(getenv('TELEGRAM_LOGIN_TOKEN_TTL_MINUTES', 5))
-TELEGRAM_LOGIN_RETURN_URL = getenv('TELEGRAM_LOGIN_RETURN_URL', 'http://localhost:8000/')
+TELEGRAM_BOT_USERNAME = getenv("TELEGRAM_BOT_USERNAME")
+TELEGRAM_BOT_TOKEN = getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_LOGIN_TOKEN_TTL_MINUTES = int(getenv("TELEGRAM_LOGIN_TOKEN_TTL_MINUTES", "5"))
+TELEGRAM_LOGIN_RETURN_URL = getenv(
+    "TELEGRAM_LOGIN_RETURN_URL", "http://localhost:8000/"
+)

@@ -7,8 +7,8 @@ from apps.shared.models import SiteConfig
 from apps.user.models import Otp
 from apps.user.repositories.sms import SmsRepo
 
-class SmsService:
 
+class SmsService:
     @staticmethod
     def send_sms(request):
         pass

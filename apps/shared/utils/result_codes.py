@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ResultCodes(Enum):
     SUCCESS = 0
     UNKNOWN_ERROR = -1
@@ -21,6 +22,15 @@ class ResultCodes(Enum):
     REGION_NOT_FOUND = -17
     TOO_MANY_REQUESTS = -18
     INVALID_TOKEN_ERROR = -19
+    BONUS_CODE_INVALID = -20
+    BONUS_CODE_ALREADY_USED = -21
+    BONUS_CODE_NOT_FOUND = -22
+    PRODUCT_NOT_FOUND = -23
+    CART_ITEM_NOT_FOUND = -24
+    CART_EMPTY = -25
+    ORDER_NOT_FOUND = -26
+    CART_NOT_FOUND = -27
+
 
 ResultMessages = {
     "SUCCESS": {
@@ -86,32 +96,32 @@ ResultMessages = {
     "OTP_NOT_FOUND": {
         "uz": "Kiritilgan kod topilmadi",
         "en": "OTP not found.",
-        "ru": "OTP не найден"
+        "ru": "OTP не найден",
     },
     "PASSWORD_UPDATED_SUCCESS": {
         "uz": "Parol muvaffaqiyatli yangilandi.",
         "en": "Password updated successfully.",
-        "ru": "Пароль успешно обновлен."
+        "ru": "Пароль успешно обновлен.",
     },
     "PASSWORD_UPDATED_FAILURE": {
         "uz": "Login yoki parol noto'g'ri.",
         "en": "Incorrect login or password.",
-        "ru": "Неверный логин или пароль."
+        "ru": "Неверный логин или пароль.",
     },
     "PROFILE_UPDATED_SUCCESS": {
         "uz": "Profil muvaffaqiyatli yangilandi.",
         "en": "Profile updated successfully.",
-        "ru": "Профиль успешно обновлён."
+        "ru": "Профиль успешно обновлён.",
     },
     "JOB_NOT_FOUND": {
         "uz": "Kasb topilmadi.",
         "en": "Job not found.",
-        "ru": "Профессия не найдена."
+        "ru": "Профессия не найдена.",
     },
     "REGION_NOT_FOUND": {
         "uz": "Hudud topilmadi.",
         "en": "Region not found.",
-        "ru": "Регион не найден."
+        "ru": "Регион не найден.",
     },
     "TOO_MANY_REQUESTS": {
         "uz": "Juda ko'p urinish. {wait} soniyadan keyin qayta urinib ko'ring.",
@@ -122,5 +132,45 @@ ResultMessages = {
         "uz": "Token yaroqsiz yoki muddati tugagan. Qaytadan tizimga kiring.",
         "en": "Invalid or expired token. Please sign in again.",
         "ru": "Токен недействителен или истёк. Войдите в систему заново.",
+    },
+    "BONUS_CODE_INVALID": {
+        "uz": "Bonus kodi noto'g'ri.",
+        "en": "Invalid bonus code.",
+        "ru": "Неверный бонусный код.",
+    },
+    "BONUS_CODE_ALREADY_USED": {
+        "uz": "Bu bonus kodi allaqachon ishlatilgan.",
+        "en": "This bonus code has already been used.",
+        "ru": "Этот бонусный код уже был использован.",
+    },
+    "BONUS_CODE_NOT_FOUND": {
+        "uz": "Bonus kodi topilmadi.",
+        "en": "Bonus code not found.",
+        "ru": "Бонусный код не найден.",
+    },
+    "PRODUCT_NOT_FOUND": {
+        "uz": "Mahsulot topilmadi.",
+        "en": "Product not found.",
+        "ru": "Товар не найден.",
+    },
+    "CART_ITEM_NOT_FOUND": {
+        "uz": "Savat elementi topilmadi.",
+        "en": "Cart item not found.",
+        "ru": "Элемент корзины не найден.",
+    },
+    "CART_EMPTY": {
+        "uz": "Savat bo'sh.",
+        "en": "Cart is empty.",
+        "ru": "Корзина пуста.",
+    },
+    "ORDER_NOT_FOUND": {
+        "uz": "Buyurtma topilmadi.",
+        "en": "Order not found.",
+        "ru": "Заказ не найден.",
+    },
+    "CART_NOT_FOUND": {
+        "uz": "Savat topilmadi",
+        "en": "Cart not found.",
+        "ru": "Корзина не найдена.",
     },
 }

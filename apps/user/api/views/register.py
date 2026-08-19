@@ -2,9 +2,9 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.throttling import UserRateThrottle
 
+from apps.user.api.serializers.register import RegisterSerializer
 from apps.user.models import User
 from apps.user.services.user_service import UserService
-from apps.user.api.serializers.register import RegisterSerializer
 
 
 class RegisterAPIView(GenericAPIView):

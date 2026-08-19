@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class SharedConfig(AppConfig):
-    name = 'apps.shared'
-    label = 'shared'
+    name = "apps.shared"
+    label = "shared"

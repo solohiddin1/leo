@@ -14,5 +14,5 @@ class SetPasswordAPIView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        password = serializer.validated_data.get('password')
+        password = serializer.validated_data.get("password")
         return UserService.set_user_password(request.user, password)

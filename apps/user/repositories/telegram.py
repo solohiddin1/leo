@@ -1,10 +1,8 @@
-from django.utils import timezone
 
 from apps.user.models import TelegramLoginToken
 
 
 class TelegramRepo:
-
     @staticmethod
     def create_token(token: str, otp_mode: bool, expires_at) -> TelegramLoginToken:
         return TelegramLoginToken.objects.create(
@@ -21,8 +19,7 @@ class TelegramRepo:
     @staticmethod
     def get_pending_token_by_telegram_id(telegram_id: int) -> TelegramLoginToken | None:
         return (
-            TelegramLoginToken.objects
-            .filter(telegram_id=telegram_id, status="PENDING")
+            TelegramLoginToken.objects.filter(telegram_id=telegram_id, status="PENDING")
             .order_by("-created_at")
             .first()
         )
@@ -51,8 +48,7 @@ class TelegramRepo:
     @staticmethod
     def confirm_latest_with_user(user):
         row = (
-            TelegramLoginToken.objects
-            .filter(user=user, status="PENDING")
+            TelegramLoginToken.objects.filter(user=user, status="PENDING")
             .order_by("-created_at")
             .first()
         )

@@ -1,5 +1,4 @@
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny
 
 from apps.shared.permission.client import ClientPermission
 from apps.user.api.serializers.device_add import DeviceAddSerializer
