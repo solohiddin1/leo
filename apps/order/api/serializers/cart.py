@@ -23,13 +23,15 @@ class ItemsSerializer(serializers.ModelSerializer):
 
 class CartSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField()
+    user_balance = serializers.SerializerMethodField()
     items = ItemsSerializer(many=True)
 
     class Meta:
         model = Cart
-        fields = ['id', 'items', 'total_price']
-
+        fields = ['id', 'items', 'total_price', 'user_balance']
 
     def get_total_price(self, obj):
-        total_price = sum(item.price for item in obj.items.all())
-        return total_price
+        return sum(item.price for item in obj.items.all())
+
+    def get_user_balance(self, obj):
+        return obj.user.balance

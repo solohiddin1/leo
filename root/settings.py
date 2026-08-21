@@ -2,6 +2,7 @@ from datetime import timedelta
 from os import getenv
 from pathlib import Path
 
+from django import template
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -66,7 +67,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
-        },
+            'builtins': ['apps.transaction.templatetags.compat'],
+        }
     },
 ]
 
@@ -207,3 +209,5 @@ TELEGRAM_LOGIN_TOKEN_TTL_MINUTES = int(getenv("TELEGRAM_LOGIN_TOKEN_TTL_MINUTES"
 TELEGRAM_LOGIN_RETURN_URL = getenv(
     "TELEGRAM_LOGIN_RETURN_URL", "http://localhost:8000/"
 )
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

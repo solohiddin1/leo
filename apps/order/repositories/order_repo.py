@@ -39,5 +39,8 @@ class OrderRepo:
             for item in items
         ])
 
+        user.balance = max(0, user.balance - total_price)
+        user.save(update_fields=['balance'])
+
         cart_items.delete()
         return order
