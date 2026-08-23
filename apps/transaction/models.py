@@ -10,7 +10,7 @@ class Bonus(models.Model):
     prefix = models.CharField(max_length=10, verbose_name="First 4 code of product", blank=True,
                               default="")
     quantity = models.PositiveIntegerField(default=9999, verbose_name="Amount of code")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
         verbose_name = 'Bonus'
