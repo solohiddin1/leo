@@ -44,7 +44,7 @@ class SubCategoryAdmin(TabbedTranslationAdmin):
 
 @admin.register(Product)
 class ProductAdmin(TabbedTranslationAdmin):
-    list_display = ("id", "name_uz", "name_ru", "price", "bonus_price", "category",
+    list_display = ("id", "name_uz", "name_ru", "price", "category",
                     "is_active", "image_preview")
     list_filter = ("is_active", "category")
     inlines = [ImageInline, BonusInline]

@@ -31,8 +31,7 @@ class Product(BaseModel):
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.BigIntegerField(default=0)
-    bonus_price = models.BigIntegerField(default=0)
-    new_column = models.BigIntegerField(default=0)
+    ordering = models.IntegerField(default=0, verbose_name="Ordering of product")
     is_active = models.BooleanField(default=True)
     category = models.ForeignKey(
         SubCategory,
