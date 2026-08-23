@@ -210,4 +210,3 @@ TELEGRAM_LOGIN_RETURN_URL = getenv(
 )
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
