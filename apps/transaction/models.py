@@ -4,12 +4,13 @@ from apps.product.models import Product
 from apps.user.models import BaseModel, User
 
 
-class Bonus(BaseModel):
+class Bonus(models.Model):
     product = models.ForeignKey(Product, models.CASCADE, 'bonuses', blank=True, null=True)
     summa = models.IntegerField(default=1, verbose_name="Amount of bonus", blank=True, null=True)
     prefix = models.CharField(max_length=10, verbose_name="First 4 code of product", blank=True,
                               default="")
     quantity = models.PositiveIntegerField(default=9999, verbose_name="Amount of code")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Bonus'
