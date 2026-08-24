@@ -30,6 +30,8 @@ class ResultCodes(Enum):
     CART_EMPTY = -25
     ORDER_NOT_FOUND = -26
     CART_NOT_FOUND = -27
+    INSUFFICIENT_BALANCE = -28
+    BONUS_CODE_IMAGE_REQUIRED = -29
 
 
 ResultMessages = {
@@ -172,5 +174,15 @@ ResultMessages = {
         "uz": "Savat topilmadi",
         "en": "Cart not found.",
         "ru": "Корзина не найдена.",
+    },
+    "INSUFFICIENT_BALANCE": {
+        "uz": "Hisobingizda mablag' yetarli emas.",
+        "en": "Insufficient balance.",
+        "ru": "Недостаточно средств на балансе.",
+    },
+    "BONUS_CODE_IMAGE_REQUIRED": {
+        "uz": "Yuklangan rasmlar soni yetarli emas.",
+        "en": "Not enough images have been uploaded.",
+        "ru": "Загружено недостаточно изображений.",
     },
 }

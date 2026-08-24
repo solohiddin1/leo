@@ -22,6 +22,10 @@ class OrderRepo:
             return None
 
         total_price = sum(item.price for item in items)
+
+        if user.balance < total_price:
+            return None
+
         order = Order.objects.create(
             user=user,
             total_price=total_price,
@@ -39,7 +43,7 @@ class OrderRepo:
             for item in items
         ])
 
-        user.balance = max(0, user.balance - total_price)
+        user.balance -= total_price
         user.save(update_fields=['balance'])
 
         cart_items.delete()

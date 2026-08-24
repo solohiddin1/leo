@@ -5,7 +5,7 @@ from apps.user.models import BaseModel, User
 
 
 class Bonus(models.Model):
-    product = models.ForeignKey(Product, models.CASCADE, 'bonuses', blank=True, null=True)
+    product = models.ForeignKey(Product, models.SET_NULL, 'bonuses', blank=True, null=True)
     summa = models.IntegerField(default=1, verbose_name="Amount of bonus", blank=True, null=True)
     prefix = models.CharField(max_length=10, verbose_name="First 4 code of product", blank=True,
                               default="")
@@ -21,7 +21,7 @@ class Bonus(models.Model):
 
 
 class BonusCode(BaseModel):
-    bonus = models.ForeignKey(Bonus, models.CASCADE, related_name='codes', verbose_name="Bonus")
+    bonus = models.ForeignKey(Bonus, models.SET_NULL, related_name='codes', verbose_name="Bonus", null=True,)
     code = models.CharField(max_length=100, unique=True, verbose_name="Code")
     is_used = models.BooleanField(default=False, verbose_name="Used")
 
@@ -30,21 +30,21 @@ class BonusCode(BaseModel):
         verbose_name_plural = 'Bonus Codes'
 
     def __str__(self):
-        return self.code
+        return self.code if self.code else f"BonusCode #{self.pk}"
 
 
 class UserSumma(BaseModel):
     user = models.ForeignKey(User, models.CASCADE, 'points')
     bonus = models.ForeignKey(Bonus, models.SET_NULL, 'redemptions', null=True, blank=True,
                               verbose_name="Бонус")
-    code = models.CharField(max_length=500)
+    code = models.OneToOneField(BonusCode, models.CASCADE, related_name='redemption', verbose_name="Код")
     # The amount granted at redemption time — Bonus.summa may be edited later, and the
     # expiry job must give back exactly what was given.
     summa = models.IntegerField(default=0, verbose_name="Сумма")
     is_expired = models.BooleanField(default=False, verbose_name="Истёк")
 
     def __str__(self):
-        return self.user.username
+        return f"{self.user.username} - {self.code.code}"
 
 
 class UserSummaImage(models.Model):

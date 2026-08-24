@@ -13,15 +13,19 @@ class BonusInline(admin.TabularInline):
     model = Bonus
     extra = 1
     fields = ('summa', 'prefix', 'quantity')
+    max_num = 50
     verbose_name = "Bonus"
     verbose_name_plural = "Bonuses"
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.order_by('-created_at')[:10]
 
 @admin.register(Bonus)
 class BonusAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'summa', 'prefix', 'quantity', 'code_count')
     list_select_related = ('product',)
-    inlines = [BonusCodeInline]
+    # inlines = [BonusCodeInline]
 
     def code_count(self, obj):
         return obj.codes.count()
@@ -48,9 +52,13 @@ class UserSummaImageInline(admin.TabularInline):
 
 @admin.register(UserSumma)
 class UserSummaAdmin(admin.ModelAdmin):
-    list_display = ('user', 'code', 'summa', 'is_expired', 'created_at')
+    list_display = ('user', 'get_code', 'summa', 'is_expired', 'created_at')
     list_filter = ('is_expired',)
-    search_fields = ('code', 'user__username')
+    search_fields = ('code__code', 'user__username')
     readonly_fields = ('user', 'bonus', 'code', 'summa', 'created_at')
-    list_select_related = ('user', 'bonus')
+    list_select_related = ('user', 'bonus', 'code')
     inlines = [UserSummaImageInline]
+
+    def get_code(self, obj):
+        return obj.code.code
+    get_code.short_description = 'Code'

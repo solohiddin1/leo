@@ -1,1 +1,1 @@
-from .bonus import CheckCodeView
+from .bonus import CheckCodeView, RequiredImagesView

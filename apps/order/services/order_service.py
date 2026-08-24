@@ -35,5 +35,8 @@ class OrderService:
             return error_response(ResultCodes.CART_ITEM_NOT_FOUND)
 
         order = OrderRepo.create_order_from_items(user, cart_items)
+        if order is None:
+            return error_response(ResultCodes.INSUFFICIENT_BALANCE)
+
         serialized = OrderSerializer(order, context={'request': request}).data
         return success_response(serialized)

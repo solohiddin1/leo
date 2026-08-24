@@ -1,6 +1,6 @@
 asgiref==3.12.1
 attrs==26.1.0
-Django==6.0.7
+Django==5.2.7
 django-jazzmin==3.0.1
 djangorestframework==3.17.1
 djangorestframework-simplejwt==5.5.0

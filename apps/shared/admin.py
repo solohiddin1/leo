@@ -17,7 +17,7 @@ class StoreAdmin(admin.ModelAdmin):
 
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):
-    list_display = ("send_otp_code", "otp_wait_seconds", "otp_timeout_seconds")
+    list_display = ("id", "required_bonus_images_count", "send_otp_code", "otp_wait_seconds", "otp_timeout_seconds")
 
 
 @admin.register(Banner)
