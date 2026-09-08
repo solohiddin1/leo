@@ -32,6 +32,11 @@ class ResultCodes(Enum):
     CART_NOT_FOUND = -27
     INSUFFICIENT_BALANCE = -28
     BONUS_CODE_IMAGE_REQUIRED = -29
+    INVALID_INPUT = -30
+    STORE_NOT_FOUND = -31
+    CLAIM_NOT_FOUND = -32
+    DEVICE_NOT_FOUND = -33
+    NOTIFICATION_NOT_FOUND = -34
 
 
 ResultMessages = {
@@ -184,5 +189,30 @@ ResultMessages = {
         "uz": "Yuklangan rasmlar soni yetarli emas.",
         "en": "Not enough images have been uploaded.",
         "ru": "Загружено недостаточно изображений.",
+    },
+    "INVALID_INPUT": {
+        "uz": "Noto'g'ri ma'lumot kiritildi.",
+        "en": "Invalid input.",
+        "ru": "Неверный ввод.",
+    },
+    "STORE_NOT_FOUND": {
+        "uz": "Do'kon topilmadi.",
+        "en": "Store not found.",
+        "ru": "Магазин не найден.",
+    },
+    "CLAIM_NOT_FOUND": {
+        "uz": "Ariza topilmadi.",
+        "en": "Claim not found.",
+        "ru": "Заявка не найдена.",
+    },
+    "DEVICE_NOT_FOUND": {
+        "uz": "Qurilma topilmadi.",
+        "en": "Device not found.",
+        "ru": "Устройство не найдено.",
+    },
+    "NOTIFICATION_NOT_FOUND": {
+        "uz": "Bildirishnoma topilmadi.",
+        "en": "Notification not found.",
+        "ru": "Уведомление не найдено.",
     },
 }

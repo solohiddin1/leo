@@ -26,6 +26,8 @@ class Store(BaseModel):
     phone_number = models.CharField(max_length=20, blank=True)
     lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     long = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    is_priority = models.BooleanField(default=False)
+    bonus_boost_percentage = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

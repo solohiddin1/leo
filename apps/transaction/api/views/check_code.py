@@ -2,29 +2,12 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 
-from apps.shared.utils.result_codes import ResultCodes
-from apps.shared.utils.utils import error_response, success_response
-from apps.transaction.api.serializers.bonus import (
-    BonusCheckQuerySerializer,
+from apps.transaction.api.serializers.check_code import (
     BonusCheckResponseSerializer,
     BonusRedeemResponseSerializer,
     BonusRedeemSerializer,
 )
-from apps.transaction.models import BonusCode, UserSumma, UserSummaImage
-from apps.transaction.services import BonusService
-from apps.shared.models import SiteConfig
-
-
-class RequiredImagesView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(
-        responses={200: {'type': 'object', 'properties': {'count': {'type': 'integer'}}}}
-    )
-    def get(self, request):
-        config = SiteConfig.objects.first()
-        count = config.required_bonus_images_count if config else 1
-        return success_response({'count': count})
+from apps.transaction.services.bonus_service import BonusService
 
 
 class CheckCodeView(GenericAPIView):
@@ -35,17 +18,8 @@ class CheckCodeView(GenericAPIView):
         responses={200: BonusCheckResponseSerializer},
     )
     def get(self, request):
-        raw_code = request.query_params.get('code', '').strip().upper()
-        if not raw_code:
-            return error_response(ResultCodes.BONUS_CODE_INVALID)
-
-        bonus_code = BonusCode.objects.select_related('bonus').filter(code=raw_code).first()
-        if not bonus_code:
-            return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
-        if bonus_code.is_used:
-            return error_response(ResultCodes.BONUS_CODE_ALREADY_USED)
-
-        return success_response({'summa': bonus_code.bonus.summa})
+        raw_code = request.query_params.get('code', '')
+        return BonusService.check_code(raw_code)
 
     @extend_schema(
         request={
@@ -53,6 +27,7 @@ class CheckCodeView(GenericAPIView):
                 'type': 'object',
                 'properties': {
                     'code': {'type': 'string'},
+                    'store_id': {'type': 'string'},
                     'images': {
                         'type': 'array',
                         'items': {'type': 'string', 'format': 'binary'}
@@ -69,5 +44,6 @@ class CheckCodeView(GenericAPIView):
         return BonusService.redeem_bonus(
             user=request.user,
             raw_code=serializer.validated_data['code'],
+            store_id=serializer.validated_data['store_id'],
             images=request.FILES.getlist('images')
         )

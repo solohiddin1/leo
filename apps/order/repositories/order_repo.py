@@ -16,20 +16,31 @@ class OrderRepo:
 
     @staticmethod
     @transaction.atomic
-    def create_order_from_items(user: User, cart_items: QuerySet) -> Order | None:
+    def create_order_from_items(user: User, cart_items: QuerySet, store_id: int = None) -> Order | None:
         items = list(cart_items.select_related("product"))
         if not items:
             return None
 
-        total_price = sum(item.price for item in items)
+        total_price = 0
+        total_bonus_price = 0
 
-        if user.balance < total_price:
-            return None
+        for item in items:
+            if item.use_bonus:
+                total_bonus_price += item.bonus_price * item.quantity
+            else:
+                total_price += item.price * item.quantity
+
+        if user.balance < total_price or user.main_balance < total_bonus_price:
+            pass
+
+        if user.balance < (total_price + total_bonus_price):
+             return None
 
         order = Order.objects.create(
             user=user,
-            total_price=total_price,
-            total=total_price,
+            total_price=total_price + total_bonus_price,
+            total=total_price + total_bonus_price,
+            store_id=store_id
         )
 
         OrderItem.objects.bulk_create([
@@ -38,12 +49,14 @@ class OrderRepo:
                 user=user,
                 product=item.product,
                 price=item.price,
+                bonus_price=item.bonus_price,
+                use_bonus=item.use_bonus,
                 quantity=item.quantity,
             )
             for item in items
         ])
 
-        user.balance -= total_price
+        user.balance -= (total_price + total_bonus_price)
         user.save(update_fields=['balance'])
 
         cart_items.delete()

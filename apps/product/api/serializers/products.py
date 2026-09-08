@@ -39,6 +39,23 @@ class ProductListSerializer(serializers.ModelSerializer):
         return None
 
 
+class AffordableProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(read_only=True, many=True)
+    category = ProductSubCategorySerializer(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "name_uz",
+            "name_ru",
+            "price",
+            "bonus_price",
+            "images",
+            "category",
+        ]
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(read_only=True, many=True)
     category = ProductSubCategorySerializer(read_only=True)

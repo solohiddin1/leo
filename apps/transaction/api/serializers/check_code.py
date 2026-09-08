@@ -11,10 +11,13 @@ class BonusCheckResponseSerializer(serializers.Serializer):
 
 class BonusRedeemSerializer(serializers.Serializer):
     code = serializers.CharField(help_text="Printed bonus code, e.g. LEOB0001")
+    store_id = serializers.IntegerField(required=True)
     images = serializers.ListField(
         child=serializers.ImageField(),
-        required=False,
-        help_text="Proof-of-purchase photos (upload multiple)",
+        required=True,
+        min_length=3,
+        max_length=3,
+        help_text="Exactly 3 proof-of-purchase photos",
     )
 
 

@@ -52,11 +52,11 @@ class UserSummaImageInline(admin.TabularInline):
 
 @admin.register(UserSumma)
 class UserSummaAdmin(admin.ModelAdmin):
-    list_display = ('user', 'get_code', 'summa', 'is_expired', 'created_at')
-    list_filter = ('is_expired',)
+    list_display = ('user', 'get_code', 'product', 'summa', 'is_expired', 'created_at')
+    list_filter = ('is_expired', 'product')
     search_fields = ('code__code', 'user__username')
-    readonly_fields = ('user', 'bonus', 'code', 'summa', 'created_at')
-    list_select_related = ('user', 'bonus', 'code')
+    readonly_fields = ('user', 'bonus', 'code', 'product', 'summa', 'created_at')
+    list_select_related = ('user', 'bonus', 'code', 'product')
     inlines = [UserSummaImageInline]
 
     def get_code(self, obj):

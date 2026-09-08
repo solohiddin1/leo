@@ -31,6 +31,8 @@ class Product(BaseModel):
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.BigIntegerField(default=0)
+    bonus_price = models.BigIntegerField(default=0, help_text="Price in bonus points")
+    is_bonus_redeemable = models.BooleanField(default=False)
     ordering = models.IntegerField(default=0, verbose_name="Ordering of product")
     is_active = models.BooleanField(default=True)
     category = models.ForeignKey(
