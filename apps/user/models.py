@@ -125,7 +125,7 @@ class Device(BaseModel):
         related_name="user_device",
     )
     device_id = models.CharField(max_length=128)
-    fcm_token = models.CharField(max_length=128, blank=True, default="")
+    fcm_token = models.CharField(max_length=256, blank=True, default="")
     is_active = models.BooleanField(default=True)
 
     def __str__(self) -> str:
