@@ -7,7 +7,7 @@ class CustomPagination(PageNumberPagination):
     page_size = 10
 
     def __init__(self):
-        extra_data = {}
+        self.extra_data = {}
 
     def get_paginated_response(self, data):
 
