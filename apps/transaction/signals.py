@@ -5,30 +5,37 @@ from django.dispatch import receiver
 
 from apps.transaction.models import Bonus, BonusCode
 
-_PREFIX_RE = re.compile(r"^(.*?)(\d+)$")
+_STRIP_ZEROS_RE = re.compile(r"^(.*?)(0*)$")
 
 
 @receiver(post_save, sender=Bonus)
-def generate_bonus_codes(sender, instance: Bonus, **kwargs):
+def generate_bonus_codes(sender, instance: Bonus, created, **kwargs):
+    if not created:
+        return
+
     if not instance.prefix or instance.quantity <= 0:
         return
 
-    match = _PREFIX_RE.match(instance.prefix)
-    if not match:
-        return
+    match = _STRIP_ZEROS_RE.match(instance.prefix)
+    clean_prefix = match.group(1) if match else instance.prefix
 
-    alpha_head, first_number = match.groups()
-    width = len(first_number)
-    start = int(first_number)
+    existing_codes = set(
+        BonusCode.objects.filter(code__startswith=clean_prefix)
+        .values_list('code', flat=True)
+    )
 
-    existing_count = instance.codes.count()
-    needed = instance.quantity - existing_count
-    if needed <= 0:
-        return
+    new_codes = []
+    serial = 1
 
-    new_codes = [
-        BonusCode(bonus=instance, code=f"{alpha_head}{start + offset:0{width}d}")
-        for offset in range(existing_count, existing_count + needed)
-    ]
+    while len(new_codes) < instance.quantity:
+        letter = chr(ord('A') + (serial % 26))
+
+        code_str = f"{clean_prefix}{letter}{serial:04d}"
+
+        if code_str not in existing_codes:
+            new_codes.append(BonusCode(bonus=instance, code=code_str))
+            existing_codes.add(code_str)
+
+        serial += 1
 
     BonusCode.objects.bulk_create(new_codes, ignore_conflicts=True)
