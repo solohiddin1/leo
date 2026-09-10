@@ -198,8 +198,6 @@
       "name": "ВВГ kabel 3x2.5",
       "description": "ВВГ kabel 3x2.5 - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 45000,
-      "bonus_price": 50,
-      "is_bonus_redeemable": true,
       "ordering": 1,
       "is_active": true,
       "category": 1
@@ -214,8 +212,6 @@
       "name": "ПВС kabel 2x1.5",
       "description": "ПВС kabel 2x1.5 - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 28000,
-      "bonus_price": 30,
-      "is_bonus_redeemable": true,
       "ordering": 2,
       "is_active": true,
       "category": 1
@@ -230,8 +226,6 @@
       "name": "LED lampa 12W",
       "description": "LED lampa 12W - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 15000,
-      "bonus_price": 15,
-      "is_bonus_redeemable": true,
       "ordering": 3,
       "is_active": true,
       "category": 2
@@ -246,8 +240,6 @@
       "name": "Prожektor 50W",
       "description": "Prожektor 50W - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 120000,
-      "bonus_price": 100,
-      "is_bonus_redeemable": true,
       "ordering": 4,
       "is_active": true,
       "category": 2
@@ -262,8 +254,6 @@
       "name": "Polipropilen truba 20mm",
       "description": "Polipropilen truba 20mm - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 18000,
-      "bonus_price": 20,
-      "is_bonus_redeemable": true,
       "ordering": 5,
       "is_active": true,
       "category": 3
@@ -278,8 +268,6 @@
       "name": "Kanalizatsiya trubasi 110mm",
       "description": "Kanalizatsiya trubasi 110mm - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 32000,
-      "bonus_price": 35,
-      "is_bonus_redeemable": true,
       "ordering": 6,
       "is_active": true,
       "category": 3
@@ -294,8 +282,6 @@
       "name": "Aralashtirgich Grohe",
       "description": "Aralashtirgich Grohe - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 350000,
-      "bonus_price": 300,
-      "is_bonus_redeemable": true,
       "ordering": 7,
       "is_active": true,
       "category": 4
@@ -310,8 +296,6 @@
       "name": "Kran shar 1/2",
       "description": "Kran shar 1/2 - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 45000,
-      "bonus_price": 40,
-      "is_bonus_redeemable": true,
       "ordering": 8,
       "is_active": true,
       "category": 4
@@ -326,8 +310,6 @@
       "name": "Portlandcement M400 50kg",
       "description": "Portlandcement M400 50kg - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 42000,
-      "bonus_price": 45,
-      "is_bonus_redeemable": true,
       "ordering": 9,
       "is_active": true,
       "category": 5
@@ -342,8 +324,6 @@
       "name": "Gips shpaklyovka 25kg",
       "description": "Gips shpaklyovka 25kg - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 38000,
-      "bonus_price": 40,
-      "is_bonus_redeemable": true,
       "ordering": 10,
       "is_active": true,
       "category": 5
@@ -358,8 +338,6 @@
       "name": "Silikat g'isht",
       "description": "Silikat g'isht - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 900,
-      "bonus_price": 1,
-      "is_bonus_redeemable": true,
       "ordering": 11,
       "is_active": true,
       "category": 6
@@ -374,8 +352,6 @@
       "name": "Gazoblok 600x300x200",
       "description": "Gazoblok 600x300x200 - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 25000,
-      "bonus_price": 25,
-      "is_bonus_redeemable": true,
       "ordering": 12,
       "is_active": true,
       "category": 6
@@ -390,8 +366,6 @@
       "name": "Bolg'a 500g",
       "description": "Bolg'a 500g - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 35000,
-      "bonus_price": 30,
-      "is_bonus_redeemable": true,
       "ordering": 13,
       "is_active": true,
       "category": 7
@@ -406,8 +380,6 @@
       "name": "Otvertka to'plami 12 dona",
       "description": "Otvertka to'plami 12 dona - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 65000,
-      "bonus_price": 60,
-      "is_bonus_redeemable": true,
       "ordering": 14,
       "is_active": true,
       "category": 7
@@ -422,8 +394,6 @@
       "name": "Perforator Bosch",
       "description": "Perforator Bosch - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 1850000,
-      "bonus_price": 1500,
-      "is_bonus_redeemable": true,
       "ordering": 15,
       "is_active": true,
       "category": 8
@@ -438,8 +408,6 @@
       "name": "Bolg'ali drel Makita",
       "description": "Bolg'ali drel Makita - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 2100000,
-      "bonus_price": 1800,
-      "is_bonus_redeemable": true,
       "ordering": 16,
       "is_active": true,
       "category": 8
@@ -454,8 +422,6 @@
       "name": "Fasad bo'yog'i 15L oq",
       "description": "Fasad bo'yog'i 15L oq - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 280000,
-      "bonus_price": 250,
-      "is_bonus_redeemable": true,
       "ordering": 17,
       "is_active": true,
       "category": 9
@@ -470,8 +436,6 @@
       "name": "Fasad grunt 10L",
       "description": "Fasad grunt 10L - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 95000,
-      "bonus_price": 90,
-      "is_bonus_redeemable": true,
       "ordering": 18,
       "is_active": true,
       "category": 9
@@ -486,8 +450,6 @@
       "name": "Ichki bo'yoq 'Tex' 9L",
       "description": "Ichki bo'yoq 'Tex' 9L - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 165000,
-      "bonus_price": 150,
-      "is_bonus_redeemable": true,
       "ordering": 19,
       "is_active": true,
       "category": 10
@@ -502,8 +464,6 @@
       "name": "Emal bo'yoq 3L yaltiroq",
       "description": "Emal bo'yoq 3L yaltiroq - sifatli mahsulot, test uchun qo'shilgan.",
       "price": 78000,
-      "bonus_price": 70,
-      "is_bonus_redeemable": true,
       "ordering": 20,
       "is_active": true,
       "category": 10

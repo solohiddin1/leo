@@ -22,9 +22,6 @@ class BonusService:
         cache.delete(BonusService.PENDING_BALANCE_CACHE_KEY.format(user_id=user_id))
         cache.delete(BonusService.TOTAL_EARNED_CACHE_KEY.format(user_id=user_id))
 
-    @staticmethod
-    def get_required_images_count() -> int:
-        return 3
 
     @staticmethod
     def check_code(raw_code: str):
