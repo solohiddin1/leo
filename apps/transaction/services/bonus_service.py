@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
+from rest_framework.request import Request
 
 from apps.shared.repositories.store_repo import StoreRepo
 from apps.shared.utils.result_codes import ResultCodes
@@ -198,3 +199,25 @@ class BonusService:
             f"• Phone: {user_phone}"
         )
         AdminTelegramNotifier.send(msg)
+
+    @staticmethod
+    def get_user_bonuses(user: User, request: Request):
+        status = request.query_params.get('status')
+        search = request.query_params.get('search')
+        from_datetime = request.query_params.get('from_datetime')
+        to_datetime = request.query_params.get('to_datetime')
+        store = request.query_params.get('store')
+
+        claims = BonusRepo.get_claims_for_user(user)
+        claims = claims.select_related('bonus__product', 'bonus')
+        if status:
+            claims = claims.filter(status=status)
+        if search:
+            claims = claims.filter(product__name__icontains=search)
+        if from_datetime:
+            claims = claims.filter(created_at__gte=from_datetime)
+        if to_datetime:
+            claims = claims.filter(created_at__lte=to_datetime)
+        if store:
+            claims = claims.filter(store_id=store)
+        return claims
