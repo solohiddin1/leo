@@ -50,7 +50,6 @@ class AffordableProductSerializer(serializers.ModelSerializer):
             "name_uz",
             "name_ru",
             "price",
-            "bonus_price",
             "images",
             "category",
         ]

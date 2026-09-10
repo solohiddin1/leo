@@ -21,25 +21,15 @@ class OrderRepo:
         if not items:
             return None
 
-        total_price = 0
-        total_bonus_price = 0
+        total_price = sum(item.price * item.quantity for item in items)
 
-        for item in items:
-            if item.use_bonus:
-                total_bonus_price += item.bonus_price * item.quantity
-            else:
-                total_price += item.price * item.quantity
-
-        if user.balance < total_price or user.main_balance < total_bonus_price:
-            pass
-
-        if user.balance < (total_price + total_bonus_price):
-             return None
+        if user.balance < total_price:
+            return None
 
         order = Order.objects.create(
             user=user,
-            total_price=total_price + total_bonus_price,
-            total=total_price + total_bonus_price,
+            total_price=total_price,
+            total=total_price,
             store_id=store_id
         )
 
@@ -49,14 +39,12 @@ class OrderRepo:
                 user=user,
                 product=item.product,
                 price=item.price,
-                bonus_price=item.bonus_price,
-                use_bonus=item.use_bonus,
                 quantity=item.quantity,
             )
             for item in items
         ])
 
-        user.balance -= (total_price + total_bonus_price)
+        user.balance -= total_price
         user.save(update_fields=['balance'])
 
         cart_items.delete()

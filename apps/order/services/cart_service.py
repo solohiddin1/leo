@@ -16,17 +16,14 @@ class CartService:
         return success_response(serialized)
 
     @staticmethod
-    def add_to_cart(user: User, product_id: int, quantity: int, request: Request, use_bonus: bool = False):
+    def add_to_cart(user: User, product_id: int, quantity: int, request: Request):
         quantity = max(quantity, 1)
         product = ProductRepo.get_by_id(product_id)
         if product is None:
             return error_response(ResultCodes.PRODUCT_NOT_FOUND)
-        
-        if use_bonus and not product.is_bonus_redeemable:
-             return error_response(ResultCodes.INVALID_INPUT, "Product not redeemable with bonus")
 
         cart = CartRepo.get_or_create_cart(user)
-        CartRepo.add_item(cart, product, quantity, use_bonus)
+        CartRepo.add_item(cart, product, quantity)
         return success_response(CartSerializer(cart, context={'request': request}).data)
 
     @staticmethod

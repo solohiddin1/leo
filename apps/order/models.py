@@ -41,8 +41,6 @@ class OrderItem(BaseModel):
         Product, on_delete=models.CASCADE, related_name="order_items"
     )
     price = models.BigIntegerField(default=0)
-    bonus_price = models.BigIntegerField(default=0)
-    use_bonus = models.BooleanField(default=False)
     quantity = models.BigIntegerField(default=1)
 
     def __str__(self):
@@ -63,8 +61,6 @@ class CartItem(BaseModel):
     )
     quantity = models.BigIntegerField(default=1)
     price = models.BigIntegerField(default=0)
-    bonus_price = models.BigIntegerField(default=0)
-    use_bonus = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("cart", "product")

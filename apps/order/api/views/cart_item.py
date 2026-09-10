@@ -16,7 +16,6 @@ class CartItemAddView(GenericAPIView):
             user=request.user,
             product_id=serializer.validated_data["product_id"],
             quantity=serializer.validated_data["quantity"],
-            use_bonus=serializer.validated_data.get("use_bonus", False),
             request=request,
         )
 

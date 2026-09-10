@@ -18,11 +18,10 @@ class ProductRepo:
     def get_affordable_list(balance: int, subcategory_id: int | None = None) -> QuerySet[Product]:
         qs = Product.objects.filter(
             is_active=True,
-            is_bonus_redeemable=True,
-            bonus_price__lte=balance,
+            price__lte=balance,
         ).select_related("category", "category__category") \
             .prefetch_related("images", "bonuses") \
-            .order_by("bonus_price")
+            .order_by("price")
         if subcategory_id is not None:
             qs = qs.filter(category_id=subcategory_id)
         return qs

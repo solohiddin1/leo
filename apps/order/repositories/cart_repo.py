@@ -33,16 +33,13 @@ class CartRepo:
         return cart.items.filter(id__in=item_ids).select_related("product")
 
     @staticmethod
-    def add_item(cart: Cart, product: Product, quantity: int, use_bonus: bool = False) -> CartItem:
-        price = product.bonus_price if use_bonus else product.price
+    def add_item(cart: Cart, product: Product, quantity: int) -> CartItem:
         item, created = CartItem.objects.get_or_create(
             cart=cart,
             product=product,
             defaults={
                 "quantity": quantity,
                 "price": product.price,
-                "bonus_price": product.bonus_price,
-                "use_bonus": use_bonus
             },
         )
         if not created:

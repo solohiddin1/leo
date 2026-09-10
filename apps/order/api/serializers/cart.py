@@ -7,7 +7,6 @@ from apps.product.api.serializers.products import ProductListSerializer
 class AddToCartSerializer(serializers.Serializer):
     product_id = serializers.IntegerField(min_value=1)
     quantity = serializers.IntegerField(min_value=1, default=1)
-    use_bonus = serializers.BooleanField(default=False)
 
 
 class UpdateCartItemSerializer(serializers.Serializer):
@@ -19,7 +18,7 @@ class ItemsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ["id", "product", "quantity", "price", "bonus_price", "use_bonus"]
+        fields = ["id", "product", "quantity", "price"]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -33,7 +32,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, obj):
         return sum(
-            item.bonus_price * item.quantity if item.use_bonus else item.price * item.quantity
+            item.price * item.quantity
             for item in obj.items.all()
         )
 
