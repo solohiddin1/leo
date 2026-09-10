@@ -3,6 +3,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.shared.models import SiteConfig
+from apps.shared.repositories.store_repo import StoreRepo
 from apps.shared.utils.result_codes import ResultCodes
 from apps.shared.utils.utils import error_response, success_response
 from apps.transaction.models import BonusClaimStatus, BonusCode
@@ -63,7 +64,11 @@ class BonusService:
             if not bonus:
                 return error_response(ResultCodes.BONUS_CODE_INVALID)
 
-            user_summa = BonusRepo.create_claim(user, bonus, bonus_code, store_id)
+            store = StoreRepo.get_by_id(store_id)
+            if not store:
+                return error_response(ResultCodes.STORE_NOT_FOUND)
+
+            user_summa = BonusRepo.create_claim(user, bonus, bonus_code, store)
 
             if images:
                 BonusRepo.bulk_create_images(user_summa, images)

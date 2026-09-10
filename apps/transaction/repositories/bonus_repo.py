@@ -1,5 +1,6 @@
 from django.db.models import QuerySet, Sum
 
+from apps.shared.models import Store
 from apps.transaction.models import Bonus, BonusClaimStatus, BonusCode, UserSumma, UserSummaImage
 from apps.user.models import User
 
@@ -19,12 +20,12 @@ class BonusRepo:
         bonus_code.save(update_fields=['is_used'])
 
     @staticmethod
-    def create_claim(user: User, bonus: Bonus, code: BonusCode, store_id: int) -> UserSumma:
+    def create_claim(user: User, bonus: Bonus, code: BonusCode, store: Store) -> UserSumma:
         return UserSumma.objects.create(
             user=user,
             bonus=bonus,
             code=code,
-            store_id=store_id,
+            store=store,
             product=bonus.product,
             summa=bonus.summa,
         )
