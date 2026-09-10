@@ -71,6 +71,13 @@ class UserSummaAdmin(admin.ModelAdmin):
 class ChallengeAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'description', 'start_date', 'end_date', 'is_active')
     list_filter = ('is_active',)
+    actions = ['activate_challenges', 'deactivate_challenges']
+
+    def activate_challenges(self, request, queryset):
+        queryset.update(is_active=True)
+
+    def deactivate_challenges(self, request, queryset):
+        queryset.update(is_active=False)
 
 
 @admin.register(UserSummaImage)
