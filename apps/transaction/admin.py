@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.transaction.models import Bonus, BonusCode, UserSumma, UserSummaImage
+from apps.transaction.models import Bonus, BonusCode, UserSumma, UserSummaImage, Challenge
 
 
 class BonusCodeInline(admin.TabularInline):
@@ -62,3 +62,14 @@ class UserSummaAdmin(admin.ModelAdmin):
     def get_code(self, obj):
         return obj.code.code
     get_code.short_description = 'Code'
+
+
+@admin.register(Challenge)
+class ChallengeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'description', 'start_date', 'end_date', 'is_active')
+    list_filter = ('is_active',)
+
+
+@admin.register(UserSummaImage)
+class UserSummaImageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user_summa', 'image')

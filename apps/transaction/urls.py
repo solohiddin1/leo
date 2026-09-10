@@ -13,7 +13,6 @@ from apps.transaction.api.views import (
 
 urlpatterns = [
     path('bonus/lookup-code/', CheckCodeView.as_view(), name='bonus-lookup-code'),
-    path('bonus/claims/', CheckCodeView.as_view(), name='bonus-claims'),
     path('bonus/lookup-shop/', ShopLookupView.as_view(), name='bonus-lookup-shop'),
     path('bonus/required-images/', RequiredImagesView.as_view(), name='bonus-required-images'),
     path('bonus/summary/', BonusSummaryView.as_view(), name='bonus-summary'),

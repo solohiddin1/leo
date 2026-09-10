@@ -37,7 +37,6 @@ class SiteConfig(BaseModel):
     send_otp_code = models.BooleanField(default=False)
     otp_wait_seconds = models.IntegerField(default=0)
     otp_timeout_seconds = models.IntegerField(default=0)
-    required_bonus_images_count = models.PositiveIntegerField(default=1, verbose_name="Required images for bonus redemption")
 
     def __str__(self):
         return (

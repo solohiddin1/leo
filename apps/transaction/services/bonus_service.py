@@ -24,8 +24,7 @@ class BonusService:
 
     @staticmethod
     def get_required_images_count() -> int:
-        config = SiteConfig.objects.first()
-        return config.required_bonus_images_count if config else 1
+        return 3
 
     @staticmethod
     def check_code(raw_code: str):

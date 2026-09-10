@@ -21,4 +21,4 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class OrderCreateSerializer(serializers.Serializer):
     cart_item_ids = serializers.ListField(child=serializers.IntegerField(min_value=1), min_length=1)
-    store_id = serializers.IntegerField(required=False)
+    store_id = serializers.IntegerField(required=True)
