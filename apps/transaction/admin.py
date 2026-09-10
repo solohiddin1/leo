@@ -13,13 +13,13 @@ class BonusInline(admin.TabularInline):
     model = Bonus
     extra = 1
     fields = ('summa', 'prefix', 'quantity')
-    max_num = 50
+    max_num = 10
     verbose_name = "Bonus"
     verbose_name_plural = "Bonuses"
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.order_by('-created_at')[:10]
+        return qs.order_by('-created_at')
 
 @admin.register(Bonus)
 class BonusAdmin(admin.ModelAdmin):
