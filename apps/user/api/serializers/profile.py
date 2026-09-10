@@ -2,12 +2,19 @@ from rest_framework import serializers
 
 from apps.user.api.serializers.job import JobSerializer
 from apps.user.api.serializers.region import RegionSerializer
-from apps.user.models import User
+from apps.user.models import Avatar, User
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Avatar
+        fields = ["id", "name", "image"]
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     job = JobSerializer()
     region = RegionSerializer()
+    avatar = AvatarSerializer()
 
     class Meta:
         model = User
@@ -22,6 +29,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "lang",
             "region",
             "job",
+            "avatar",
         ]
 
 

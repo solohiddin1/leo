@@ -1,13 +1,13 @@
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
 
+from apps.shared.permission.client import ClientPermission
 from apps.shared.utils.paginator import CustomPagination
 from apps.transaction.api.serializers.bonus_history import UserSummaSerializer
 from apps.transaction.repositories.bonus_repo import BonusRepo
 
 
 class BonusHistoryView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ClientPermission]
     serializer_class = UserSummaSerializer
     pagination_class = CustomPagination
 

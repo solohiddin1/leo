@@ -1,5 +1,4 @@
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
 
 from apps.shared.models import Store
 from apps.shared.permission.client import ClientPermission

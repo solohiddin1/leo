@@ -1,13 +1,13 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
 
+from apps.shared.permission.client import ClientPermission
 from apps.transaction.api.serializers.shop_lookup import ShopLookupResponseSerializer, ShopLookupSerializer
 from apps.transaction.services.shop_service import ShopService
 
 
 class ShopLookupView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ClientPermission]
     serializer_class = ShopLookupSerializer
 
     @extend_schema(

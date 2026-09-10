@@ -1,14 +1,14 @@
 from django.utils import timezone
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
 
+from apps.shared.permission.client import ClientPermission
 from apps.shared.utils.utils import success_response
 from apps.transaction.api.serializers.challenges import ChallengeSerializer
 from apps.transaction.repositories.challenge_repo import ChallengeRepo
 
 
 class ChallengeListView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ClientPermission]
     serializer_class = ChallengeSerializer
 
     def get(self, request):

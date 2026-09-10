@@ -1,7 +1,7 @@
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
 
+from apps.shared.permission.client import ClientPermission
 from apps.transaction.api.serializers.check_code import (
     BonusCheckResponseSerializer,
     BonusRedeemResponseSerializer,
@@ -11,7 +11,7 @@ from apps.transaction.services.bonus_service import BonusService
 
 
 class CheckCodeView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ClientPermission]
 
     @extend_schema(
         parameters=[OpenApiParameter(name='code', type=str, location=OpenApiParameter.QUERY, required=True)],

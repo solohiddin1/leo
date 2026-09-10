@@ -1,14 +1,16 @@
 from rest_framework import serializers
 
+from apps.product.api.serializers.products import ProductListSerializer
 from apps.transaction.models import Challenge
 
 
 class ChallengeSerializer(serializers.ModelSerializer):
+    product = ProductListSerializer(read_only=True)
     progress = serializers.SerializerMethodField()
 
     class Meta:
         model = Challenge
-        fields = ['id', 'title', 'description', 'target_count', 'reward_amount', 'start_date', 'end_date', 'progress']
+        fields = ['id', 'title', 'description', 'product', 'target_count', 'reward_amount', 'start_date', 'end_date', 'progress']
 
     def get_progress(self, obj):
         user = self.context['request'].user

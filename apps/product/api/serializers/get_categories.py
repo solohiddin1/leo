@@ -6,7 +6,7 @@ from apps.product.models import Category, SubCategory
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ["id", "name_uz", "name_ru", "category"]
+        fields = ["id", "name_uz", "name_ru", "category", "image", "image_compressed"]
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -14,7 +14,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ["id", "name_uz", "name_ru", "subcategories"]
+        fields = ["id", "name_uz", "name_ru", "image", "image_compressed", "subcategories"]
 
 
 class SubCategoryDetailSerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class SubCategoryDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SubCategory
-        fields = ["id", "name_uz", "name_ru", "category", "product_count"]
+        fields = ["id", "name_uz", "name_ru", "category", "image", "image_compressed", "product_count"]
 
     def get_product_count(self, obj) -> int:
         return obj.product_category.count()

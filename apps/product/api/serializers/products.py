@@ -6,7 +6,7 @@ from apps.product.models import Image, Product, SubCategory
 class ProductSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ["id", "name_uz", "name_ru"]
+        fields = ["id", "name_uz", "name_ru", "image", "image_compressed"]
 
 
 class ProductImageSerializer(serializers.ModelSerializer):

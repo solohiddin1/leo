@@ -58,11 +58,14 @@ class UserSummaAdmin(admin.ModelAdmin):
     readonly_fields = ('user', 'bonus', 'code', 'product', 'summa', 'created_at')
     list_select_related = ('user', 'bonus', 'code', 'product')
     inlines = [UserSummaImageInline]
+    actions = ['approve_bonus_codes']
 
     def get_code(self, obj):
         return obj.code.code
     get_code.short_description = 'Code'
 
+    def approve_bonus_codes(self, request, queryset):
+        queryset.update(status="approved")
 
 @admin.register(Challenge)
 class ChallengeAdmin(admin.ModelAdmin):

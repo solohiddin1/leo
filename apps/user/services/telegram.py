@@ -14,13 +14,13 @@ from apps.user.services.sms import SmsService
 
 logger = get_logger()
 
-SUCCESS_MSG = "✅ Muvaffaqiyatli kirdingiz! Saytga qaytishingiz mumkin."
-SUCCESS_MSG_WITH_URL = "✅ Muvaffaqiyatli kirdingiz!\n\n👉 Saytga qaytish: {url}"
-NO_TOKEN_MSG = "Kirish uchun saytdagi «Telegram orqali kirish» tugmasini bosing."
+SUCCESS_MSG = "✅ Muvaffaqiyatli kirdingiz! Ilovaga qaytishingiz mumkin."
+SUCCESS_MSG_WITH_URL = "✅ Muvaffaqiyatli kirdingiz!\n\n👉 Ilovaga qaytish: {url}"
+NO_TOKEN_MSG = "Kirish uchun ilovadagi «Telegram orqali kirish» tugmasini bosing."
 NO_TOKEN_MSG_WITH_URL = (
-    "Kirish uchun saytdagi «Telegram orqali kirish» tugmasini bosing:\n\n👉 {url}"
+    "Kirish uchun ilovadagi «Telegram orqali kirish» tugmasini bosing:\n\n👉 {url}"
 )
-EXPIRED_MSG = "⚠️ Havola eskirgan yoki yaroqsiz. Iltimos, saytdan qayta urinib ko'ring."
+EXPIRED_MSG = "⚠️ Havola eskirgan yoki yaroqsiz. Iltimos, ilovadan qayta urinib ko'ring."
 ASK_PHONE_MSG = "Kirishni yakunlash uchun telefon raqamingizni ulashing 👇"
 WRONG_CONTACT_MSG = "Iltimos, o'zingizning telefon raqamingizni ulashing."
 OTP_TIME_LIMIT_MSG = "Iltimos otp so'rovi uchun {seconds} sekund kuting"

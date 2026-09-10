@@ -2,13 +2,13 @@ from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 
-from apps.shared.models import SiteConfig
 from apps.shared.repositories.store_repo import StoreRepo
 from apps.shared.utils.result_codes import ResultCodes
 from apps.shared.utils.utils import error_response, success_response
 from apps.transaction.models import BonusClaimStatus, BonusCode
 from apps.transaction.repositories.bonus_repo import BonusRepo
 from apps.transaction.repositories.challenge_repo import ChallengeRepo
+from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
 from apps.user.models import User
 
 
@@ -41,7 +41,7 @@ class BonusService:
     def redeem_bonus(user: User, raw_code: str, store_id: int, images=None):
         raw_code = raw_code.strip().upper()
 
-        required_count = BonusService.get_required_images_count()
+        required_count = 3
 
         images = images or []
         if len(images) < required_count:
@@ -102,6 +102,7 @@ class BonusService:
                 "status": BonusClaimStatus.PENDING,
             },
         )
+        BonusService.notify_code_used(bonus_code, user)
 
     @staticmethod
     def approve_claim(claim_id: int, admin_user: User):
@@ -170,3 +171,30 @@ class BonusService:
             'pending_balance': BonusService.get_user_pending_balance(user),
             'total_earned': BonusService.get_user_total_earned(user),
         })
+
+    @staticmethod
+    def notify_code_used(code: BonusCode, user: User = None):
+
+        if not user and hasattr(code, "redemption") and code.redemption:
+            user = code.redemption.user
+
+        user_name = f"{user.first_name} {user.last_name}".strip() if user else "N/A"
+        user_phone = user.username if user else "N/A"
+
+        product_name = "N/A"
+        if hasattr(code, "redemption") and code.redemption and code.redemption.product:
+            product_name = code.redemption.product.name
+        elif code.bonus and code.bonus.product:
+            product_name = code.bonus.product.name
+
+        summa = code.bonus.summa if code.bonus else 0
+
+        msg = (
+            f"🔑 Bonus code used:\n"
+            f"• Code: {code.code}\n"
+            f"• Product: {product_name}\n"
+            f"• Bonus Summa: {summa}\n"
+            f"• User: {user_name or 'N/A'}\n"
+            f"• Phone: {user_phone}"
+        )
+        AdminTelegramNotifier.send(msg)
