@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 
@@ -13,6 +14,7 @@ class GetBannerListAPIView(GenericAPIView):
     throttle_classes = [GeneralThrottle]
     serializer_class = BannerSerializer
 
+    @extend_schema(operation_id="shared_banners_list")
     def get(self, request, *args, **kwargs):
         banners = BannerRepo.get_active_list()
         serializer = self.get_serializer(banners, many=True)
@@ -24,6 +26,7 @@ class GetBannerDetailAPIView(GenericAPIView):
     throttle_classes = [GeneralThrottle]
     serializer_class = BannerSerializer
 
+    @extend_schema(operation_id="shared_banners_detail")
     def get(self, request, pk: int, *args, **kwargs):
         banner = BannerRepo.get_by_id(pk)
         if not banner:

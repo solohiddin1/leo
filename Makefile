@@ -12,3 +12,9 @@ regions:
 
 runserver2:
 	python manage.py runserver 8001
+
+spectacular:
+	python manage.py spectacular --file schema.yml
+
+check:
+	python manage.py check

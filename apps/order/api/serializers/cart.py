@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.order.models import Cart, CartItem
@@ -30,11 +31,13 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['id', 'items', 'total_price', 'user_balance']
 
+    @extend_schema_field(serializers.IntegerField)
     def get_total_price(self, obj):
         return sum(
             item.price * item.quantity
             for item in obj.items.all()
         )
 
+    @extend_schema_field(serializers.IntegerField)
     def get_user_balance(self, obj):
         return obj.user.balance

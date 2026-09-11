@@ -8,21 +8,24 @@ from apps.shared.security import GeneralThrottle
 from apps.shared.utils.paginator import CustomPagination
 
 
-@extend_schema(parameters=[
-    OpenApiParameter(
-        name='subcategory',
-        type=int,
-        location=OpenApiParameter.QUERY,
-        description='Filter or page number',
-        required=False
-    )]
-)
 class ProductListApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
     throttle_classes = [GeneralThrottle]
     pagination_class = CustomPagination
 
+    @extend_schema(
+        operation_id="product_products_list",
+        parameters=[
+            OpenApiParameter(
+                name='subcategory',
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description='Filter or page number',
+                required=False
+            )
+        ]
+    )
     def get(self, request, *args, **kwargs):
         subcategory_id = request.query_params.get("subcategory")
         if subcategory_id is not None and not subcategory_id.isdigit():

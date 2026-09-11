@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.product.models import Image, Product, SubCategory
@@ -32,6 +33,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "category",
         ]
 
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_bonus_summa(self, obj):
         bonuses = list(obj.bonuses.all())
         if bonuses:
@@ -75,6 +77,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "created_at",
         ]
 
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_bonus_summa(self, obj):
         bonuses = list(obj.bonuses.all())
         if bonuses:
