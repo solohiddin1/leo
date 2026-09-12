@@ -7,4 +7,3 @@ class ProductConfig(AppConfig):
 
     def ready(self):
         import apps.product.signals
-        return super().ready()

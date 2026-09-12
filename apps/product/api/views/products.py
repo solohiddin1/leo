@@ -5,23 +5,27 @@ from rest_framework.permissions import AllowAny
 from apps.product.api.serializers.products import ProductListSerializer
 from apps.product.repositories.product_repo import ProductRepo
 from apps.shared.security import GeneralThrottle
-from apps.shared.utils.utils import success_response
+from apps.shared.utils.paginator import CustomPagination
 
 
-@extend_schema(parameters=[
-    OpenApiParameter(
-        name='subcategory',
-        type=int,
-        location=OpenApiParameter.QUERY,
-        description='Filter or page number',
-        required=False
-    )]
-)
 class ProductListApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
     throttle_classes = [GeneralThrottle]
+    pagination_class = CustomPagination
 
+    @extend_schema(
+        operation_id="product_products_list",
+        parameters=[
+            OpenApiParameter(
+                name='subcategory',
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description='Filter or page number',
+                required=False
+            )
+        ]
+    )
     def get(self, request, *args, **kwargs):
         subcategory_id = request.query_params.get("subcategory")
         if subcategory_id is not None and not subcategory_id.isdigit():
@@ -29,5 +33,6 @@ class ProductListApiView(GenericAPIView):
         products = ProductRepo.get_active_list(
             subcategory_id=int(subcategory_id) if subcategory_id else None
         )
-        serializer = self.get_serializer(products, many=True)
-        return success_response(serializer.data)
+        page = self.paginate_queryset(products)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)

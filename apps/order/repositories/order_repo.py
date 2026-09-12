@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.db.models import QuerySet
 
-from apps.order.models import Cart, Order, OrderItem
+from apps.order.models import Order, OrderItem
 from apps.user.models import User
 
 
@@ -16,30 +16,36 @@ class OrderRepo:
 
     @staticmethod
     @transaction.atomic
-    def create_order_from_cart(user: User, cart: Cart) -> Order | None:
-        cart_items = cart.items.select_related("product").all()
-        if not cart_items.exists():
+    def create_order_from_items(user: User, cart_items: QuerySet, store_id: int = None) -> Order | None:
+        items = list(cart_items.select_related("product"))
+        if not items:
             return None
 
-        total_price = sum(item.price for item in cart_items)
+        total_price = sum(item.price * item.quantity for item in items)
+
+        if user.balance < total_price:
+            return None
+
         order = Order.objects.create(
             user=user,
             total_price=total_price,
-            total=total_price  # total seems to be redundant or used differently
+            total=total_price,
+            store_id=store_id
         )
 
-        order_items = [
+        OrderItem.objects.bulk_create([
             OrderItem(
                 order=order,
                 user=user,
                 product=item.product,
                 price=item.price,
-                quantity=item.quantity
+                quantity=item.quantity,
             )
-            for item in cart_items
-        ]
-        OrderItem.objects.bulk_create(order_items)
+            for item in items
+        ])
 
-        cart.items.all().delete()
+        user.balance -= total_price
+        user.save(update_fields=['balance'])
 
+        cart_items.delete()
         return order

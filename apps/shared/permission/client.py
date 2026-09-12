@@ -9,6 +9,4 @@ class ClientPermission(BasePermission):
             return False
 
         db_user = User.objects.get(pk=request.user.id)
-        if db_user.is_verified and db_user.is_active:
-            return True
-        return False
+        return bool(db_user.is_verified and db_user.is_active)

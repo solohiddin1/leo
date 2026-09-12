@@ -16,8 +16,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'total_price', 'total', 'is_completed', 'items', 'created_at']
+        fields = ['id', 'total_price', 'total', 'state', 'is_completed', 'items', 'created_at']
 
 
 class OrderCreateSerializer(serializers.Serializer):
-    cart_item_id = serializers.IntegerField()
+    cart_item_ids = serializers.ListField(child=serializers.IntegerField(min_value=1), min_length=1)
+    store_id = serializers.IntegerField(required=True)

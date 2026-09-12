@@ -5,7 +5,8 @@ from apps.order.models import Order, OrderItem
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "total_price", "store")
+    list_display = ("id", "user", "total_price", "store", "state")
+    list_filter = ("state",)
 
 
 @admin.register(OrderItem)

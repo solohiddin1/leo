@@ -13,5 +13,8 @@ regions:
 runserver2:
 	python manage.py runserver 8001
 
-regions:
-	python manage.py loaddata apps/shared/regions
+spectacular:
+	python manage.py spectacular --file schema.yml
+
+check:
+	python manage.py check

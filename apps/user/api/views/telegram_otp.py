@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from apps.user.api.serializers.telegram_otp_verify import TelegramOtpVerifySeria
 from apps.user.services.telegram import TgOtpService
 
 
+@extend_schema(exclude=True)
 class TelegramOtpView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = None
@@ -22,6 +24,7 @@ class TelegramOtpView(GenericAPIView):
             )
 
 
+@extend_schema(exclude=True)
 class TelegramWebhookView(APIView):
     permission_classes = [AllowAny]
     serializer_class = None
@@ -32,6 +35,7 @@ class TelegramWebhookView(APIView):
         return Response({"ok": True})
 
 
+@extend_schema(exclude=True)
 class TelegramOtpPollView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = None

@@ -1,13 +1,13 @@
 from django.contrib import admin
 from modeltranslation.admin import TabbedTranslationAdmin
 
-from apps.user.models import Job, Otp, TelegramLoginToken, User
+from apps.user.models import Device, Job, Otp, TelegramLoginToken, User
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("username", "first_name", "last_name", "email")
-
+    exclude = ('password',)
 
 @admin.register(Otp)
 class OtpAdmin(admin.ModelAdmin):
@@ -22,3 +22,9 @@ class TelegramLoginTokenAdmin(admin.ModelAdmin):
 @admin.register(Job)
 class JobAdmin(TabbedTranslationAdmin):
     list_display = ("id", "title")
+
+
+@admin.register(Device)
+class DeviceAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "name", "device_type", "is_active", "created_at")
+    list_filter = ("device_type", "is_active")

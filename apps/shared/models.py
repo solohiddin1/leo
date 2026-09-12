@@ -5,9 +5,9 @@ from apps.user.models import BaseModel
 
 class Region(models.Model):
     soato_id = models.IntegerField(unique=True, null=True)
-    name_uz = models.CharField(max_length=100, null=True)
-    name_ru = models.CharField(max_length=100, blank=True, null=True)
-    name_en = models.CharField(max_length=100, blank=True, null=True)
+    name_uz = models.CharField(max_length=100, default="")
+    name_ru = models.CharField(max_length=100, blank=True, default="")
+    name_en = models.CharField(max_length=100, blank=True, default="")
     ordering = models.IntegerField(default=100)
 
     class Meta:
@@ -26,6 +26,8 @@ class Store(BaseModel):
     phone_number = models.CharField(max_length=20, blank=True)
     lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     long = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    is_priority = models.BooleanField(default=False)
+    bonus_boost_percentage = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

@@ -8,21 +8,17 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = getenv("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = "True"
 
 ALLOWED_HOSTS = ["*"]
 
-
-# Application definition
-
 BASE = [
     "jazzmin",
     "modeltranslation",
-    "django.contrib.admin",
+    # "django.contrib.admin",
+    "root.admin_site.MyAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -30,7 +26,11 @@ BASE = [
     "django.contrib.staticfiles",
 ]
 
-LIBS = ["rest_framework", "drf_spectacular", "rest_framework_simplejwt.token_blacklist"]
+LIBS = [
+    "rest_framework",
+    "drf_spectacular",
+    "rest_framework_simplejwt.token_blacklist"
+]
 
 APPS = [
     "apps.user",
@@ -38,6 +38,7 @@ APPS = [
     "apps.product",
     "apps.order",
     "apps.transaction",
+    "apps.notification",
 ]
 
 INSTALLED_APPS = BASE + LIBS + APPS
@@ -66,7 +67,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
-        },
+        }
     },
 ]
 
@@ -124,9 +125,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "static"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -170,6 +168,13 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            # "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # "SOCKET_CONNECT_TIMEOUT": 5,
+            # "SOCKET_TIMEOUT": 5,
+            "socket_connect_timeout": 5,
+            "socket_timeout": 5,
+        }
     }
 }
 SIMPLE_JWT = {
@@ -207,3 +212,14 @@ TELEGRAM_LOGIN_TOKEN_TTL_MINUTES = int(getenv("TELEGRAM_LOGIN_TOKEN_TTL_MINUTES"
 TELEGRAM_LOGIN_RETURN_URL = getenv(
     "TELEGRAM_LOGIN_RETURN_URL", "http://localhost:8000/"
 )
+
+# for admin
+# TELEGRAM_BOT_TOKEN is for client
+TELEGRAM_ADMIN_BOT_TOKEN = getenv("TELEGRAM_ADMIN_BOT_TOKEN")
+TELEGRAM_ADMIN_CHAT_ID = getenv("TELEGRAM_ADMIN_CHAT_ID")
+
+FIREBASE_CREDENTIALS_FILE = getenv(
+    "FIREBASE_CREDENTIALS_FILE", str("firebase/leo-usta-firebase-adminsdk-fbsvc-41b6970f3f.json")
+)
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

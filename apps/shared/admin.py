@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from apps.product.admin import image_preview
 from apps.shared.models import Banner, Region, SiteConfig, Store
 
 
@@ -16,10 +17,13 @@ class StoreAdmin(admin.ModelAdmin):
 
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):
-    list_display = ("send_otp_code", "otp_wait_seconds", "otp_timeout_seconds")
+    list_display = ("id", "send_otp_code", "otp_wait_seconds", "otp_timeout_seconds")
 
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "ordering", "is_active")
+    list_display = ("id", "name", "ordering", "is_active", "image_preview")
     list_editable = ("ordering", "is_active")
+    readonly_fields = ('image_compressed', )
+
+    image_preview = image_preview

@@ -27,9 +27,9 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
     balance = models.BigIntegerField(default=0)
     is_verified = models.BooleanField(default=False)
     otp_sent_count = models.IntegerField(default=0)
-    telegram_id = models.CharField(max_length=20, blank=True, null=True)
-    telegram_username = models.CharField(max_length=100, blank=True, null=True)
-    lang = models.CharField(choices=LANG_CHOICES, max_length=5, blank=True, null=True)
+    telegram_id = models.CharField(max_length=20, blank=True, default="")
+    telegram_username = models.CharField(max_length=100, blank=True, default="")
+    lang = models.CharField(choices=LANG_CHOICES, max_length=5, blank=True, default="uz")
     is_developer = models.BooleanField(default=False)
     region = models.ForeignKey(
         "shared.Region",
@@ -66,14 +66,15 @@ class Otp(BaseModel):
     code = models.CharField(max_length=4)
     is_verified = models.BooleanField(default=False)
     is_used = models.BooleanField(default=False)
-    device_id = models.CharField(max_length=128, blank=True, null=True)
+    device_id = models.CharField(max_length=128, blank=True, default="")
     expires_at = models.DateTimeField()
+
+    class Meta:
+        indexes = [models.Index(fields=["user"])]
 
     def __str__(self):
         return f"{self.code}-{self.phone_number}"
 
-    class Meta:
-        indexes = [models.Index(fields=["user"])]
 
 
 class TelegramLoginToken(BaseModel):
@@ -124,5 +125,8 @@ class Device(BaseModel):
         related_name="user_device",
     )
     device_id = models.CharField(max_length=128)
-    fcm_token = models.CharField(max_length=128, blank=True, default=True)
+    fcm_token = models.CharField(max_length=256, blank=True, default="")
     is_active = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return self.name
