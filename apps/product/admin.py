@@ -20,6 +20,8 @@ class SubCategoryInline(StackedAdmin):
     fk_name = "category"
     extra = 1
     show_change_link = True
+    readonly_fields = ['image_compressed', 'image_preview']
+    image_preview = image_preview
 
 
 class ProductImageInline(StackedAdmin):
