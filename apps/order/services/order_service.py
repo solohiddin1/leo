@@ -5,6 +5,7 @@ from apps.order.api.serializers.order import (
     OrderCreateSerializer,
     OrderSerializer,
 )
+from apps.order.models import Order
 from apps.order.repositories.cart_repo import CartRepo
 from apps.order.repositories.order_repo import OrderRepo
 from apps.shared.utils.result_codes import ResultCodes
@@ -19,6 +20,12 @@ class OrderService:
         if order is None:
             return error_response(ResultCodes.ORDER_NOT_FOUND)
         serialized = OrderSerializer(order, context={'request': request}).data
+        return success_response(serialized)
+
+    @staticmethod
+    def get_active_confirmable_orders(user: User, request: Request):
+        orders = OrderRepo.get_active_orders(user)
+        serialized = OrderSerializer(orders, many=True, context={'request': request}).data
         return success_response(serialized)
 
     @staticmethod
@@ -65,3 +72,11 @@ class OrderService:
 
         serialized = OrderSerializer(order, context={'request': request}).data
         return success_response({'order': serialized, 'message': message})
+
+    @staticmethod
+    def approve_order(order: Order) -> Order:
+        return OrderRepo.approve_order(order)
+
+    @staticmethod
+    def reject_order(order: Order) -> Order:
+        return OrderRepo.reject_order(order)

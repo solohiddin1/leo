@@ -12,8 +12,34 @@ class OrderRepo:
         return Order.objects.filter(user=user).order_by("-created_at")
 
     @staticmethod
+    def get_active_orders(user: User) -> QuerySet[Order]:
+        return Order.objects.filter(
+            user=user,
+            is_completed=False,
+        ).exclude(state=OrderState.CANCELLED).order_by("-created_at")
+
+    @staticmethod
     def get_order_by_id(user: User, order_id: int) -> Order | None:
         return Order.objects.filter(user=user, id=order_id).first()
+
+    @staticmethod
+    def approve_order(order: Order) -> Order:
+        if order.state != OrderState.ACCEPTED:
+            order.state = OrderState.ACCEPTED
+            order.save(update_fields=["state", "updated_at"])
+        return order
+
+    @staticmethod
+    @transaction.atomic
+    def reject_order(order: Order) -> Order:
+        if order.state != OrderState.CANCELLED:
+            user = order.user
+            user.balance += order.total_price
+            user.save(update_fields=["balance"])
+
+            order.state = OrderState.CANCELLED
+            order.save(update_fields=["state", "updated_at"])
+        return order
 
     @staticmethod
     def complete_order(order: Order) -> Order:

@@ -1,13 +1,36 @@
 from django.contrib import admin
 
 from apps.order.models import Order, OrderItem
+from apps.order.services.order_service import OrderService
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "total_price", "store", "state")
-    list_filter = ("state",)
+    list_display = ("id", "user", "total_price", "store", "state", "is_completed")
+    list_filter = ("state", "is_completed")
+    actions = ["approve_order", "reject_order"]
 
+    @admin.action(description="Tanlanganni tasdiqlash")
+    def approve_order(self, request, queryset):
+        success_count = 0
+        for order in queryset:
+            OrderService.approve_order(order)
+            success_count += 1
+        self.message_user(request, f"{success_count} ta buyurtma muvaffaqiyatli tasdiqlandi.")
+
+    @admin.action(description="Tanlanganni bekor qilish")
+    def reject_order(self, request, queryset):
+        success_count = 0
+        for order in queryset:
+            OrderService.reject_order(order)
+            success_count += 1
+        self.message_user(request, f"{success_count} ta buyurtma bekor qilindi va mablag' qaytarildi.")
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
