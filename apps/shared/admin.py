@@ -2,7 +2,15 @@ from django.contrib import admin
 
 from apps.product.admin import image_preview
 from apps.product.translation import CustomAdmin
-from apps.shared.models import AppInfo, Banner, FAQ, Region, SiteConfig, Store
+from apps.shared.models import (
+    AppInfo,
+    Banner,
+    FAQ,
+    Region,
+    SiteConfig,
+    Store,
+    TrainingVideo,
+)
 
 
 @admin.register(Region)
@@ -48,3 +56,10 @@ class FAQAdmin(CustomAdmin):
     list_display = ("id", "question_uz", "question_ru", "ordering", "is_active")
     list_editable = ("ordering", "is_active")
     search_fields = ("question_uz", "question_ru", "answer_uz", "answer_ru")
+
+
+@admin.register(TrainingVideo)
+class TrainingVideoAdmin(CustomAdmin):
+    list_display = ("id", "name_uz", "name_ru", "youtube_url", "file", "ordering", "is_active")
+    list_editable = ("ordering", "is_active")
+    search_fields = ("name_uz", "name_ru", "description_uz", "description_ru")

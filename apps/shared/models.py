@@ -98,3 +98,21 @@ class FAQ(BaseModel):
 
     def __str__(self):
         return self.question
+
+
+class TrainingVideo(BaseModel):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, default="")
+    youtube_url = models.CharField(max_length=500, blank=True, default="")
+    file = models.FileField(upload_to="training_videos/", null=True, blank=True)
+    ordering = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["ordering", "-created_at"]
+        verbose_name = "Training Video"
+        verbose_name_plural = "Training Videos"
+
+    def __str__(self):
+        return self.name
+

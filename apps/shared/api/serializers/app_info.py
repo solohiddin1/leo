@@ -9,10 +9,8 @@ class FAQSerializer(serializers.ModelSerializer):
         model = FAQ
         fields = [
             "id",
-            "question",
             "question_uz",
             "question_ru",
-            "answer",
             "answer_uz",
             "answer_ru",
             "ordering",
