@@ -6,6 +6,7 @@ from apps.product.api.serializers.products import ProductListSerializer
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductListSerializer()
+
     class Meta:
         model = OrderItem
         fields = ['id', 'product', 'quantity', 'price']
@@ -16,9 +17,31 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'total_price', 'total', 'state', 'is_completed', 'items', 'created_at']
+        fields = [
+            'id',
+            'total_price',
+            'total',
+            'state',
+            'is_completed',
+            'problem_note',
+            'items',
+            'created_at',
+        ]
 
 
 class OrderCreateSerializer(serializers.Serializer):
-    cart_item_ids = serializers.ListField(child=serializers.IntegerField(min_value=1), min_length=1)
+    cart_item_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1), min_length=1
+    )
     store_id = serializers.IntegerField(required=True)
+
+
+class OrderConfirmSerializer(serializers.Serializer):
+    order_id = serializers.IntegerField(required=True)
+    is_good = serializers.BooleanField(
+        required=True,
+        help_text="True if order received cleanly, False if order has problem",
+    )
+    problem_note = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )

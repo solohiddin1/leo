@@ -27,6 +27,7 @@ class Order(BaseModel):
         choices=OrderState.choices,
         default=OrderState.CHECKING,
     )
+    problem_note = models.TextField(blank=True, default="")
 
     def __str__(self):
         return f"Order #{self.pk}"

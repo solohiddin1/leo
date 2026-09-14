@@ -1,6 +1,10 @@
 from urllib.request import Request
 
-from apps.order.api.serializers.order import OrderCreateSerializer, OrderSerializer
+from apps.order.api.serializers.order import (
+    OrderConfirmSerializer,
+    OrderCreateSerializer,
+    OrderSerializer,
+)
 from apps.order.repositories.cart_repo import CartRepo
 from apps.order.repositories.order_repo import OrderRepo
 from apps.shared.utils.result_codes import ResultCodes
@@ -37,3 +41,27 @@ class OrderService:
 
         serialized = OrderSerializer(order, context={'request': request}).data
         return success_response(serialized)
+
+    @staticmethod
+    def confirm_order(user: User, request: Request):
+        serializer = OrderConfirmSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error_response(ResultCodes.INVALID_INPUT)
+
+        order_id = serializer.validated_data['order_id']
+        is_good = serializer.validated_data['is_good']
+        problem_note = serializer.validated_data.get('problem_note', '')
+
+        order = OrderRepo.get_order_by_id(user, order_id)
+        if order is None:
+            return error_response(ResultCodes.ORDER_NOT_FOUND)
+
+        if is_good:
+            order = OrderRepo.complete_order(order)
+            message = "Order marked as completed."
+        else:
+            order = OrderRepo.report_order_problem(order, problem_note)
+            message = "Order problem reported to admin bot."
+
+        serialized = OrderSerializer(order, context={'request': request}).data
+        return success_response({'order': serialized, 'message': message})

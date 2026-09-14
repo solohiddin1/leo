@@ -1,7 +1,8 @@
 from django.db import transaction
 from django.db.models import QuerySet
 
-from apps.order.models import Order, OrderItem
+from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
+from apps.order.models import Order, OrderItem, OrderState
 from apps.user.models import User
 
 
@@ -13,6 +14,40 @@ class OrderRepo:
     @staticmethod
     def get_order_by_id(user: User, order_id: int) -> Order | None:
         return Order.objects.filter(user=user, id=order_id).first()
+
+    @staticmethod
+    def complete_order(order: Order) -> Order:
+        order.is_completed = True
+        order.state = OrderState.COMPLETED
+        order.save(update_fields=["is_completed", "state", "updated_at"])
+
+        user = order.user
+        msg = (
+            f"✅ <b>Order Completed!</b>\n\n"
+            f"<b>Order ID:</b> #{order.id}\n"
+            f"<b>Client:</b> {user.first_name} {user.last_name} (@{user.telegram_username or 'N/A'})\n"
+            f"<b>Telegram ID:</b> {user.telegram_id or 'N/A'}\n"
+            f"<b>Total Price:</b> {order.total_price}"
+        )
+        AdminTelegramNotifier.send(msg)
+        return order
+
+    @staticmethod
+    def report_order_problem(order: Order, problem_note: str) -> Order:
+        order.problem_note = problem_note
+        order.save(update_fields=["problem_note", "updated_at"])
+
+        user = order.user
+        msg = (
+            f"⚠️ <b>Order Problem Reported!</b>\n\n"
+            f"<b>Order ID:</b> #{order.id}\n"
+            f"<b>Client:</b> {user.first_name} {user.last_name} (@{user.telegram_username or 'N/A'})\n"
+            f"<b>Telegram ID:</b> {user.telegram_id or 'N/A'}\n"
+            f"<b>Total Price:</b> {order.total_price}\n"
+            f"<b>Problem Note:</b> {problem_note or 'No description provided'}"
+        )
+        AdminTelegramNotifier.send(msg)
+        return order
 
     @staticmethod
     @transaction.atomic
