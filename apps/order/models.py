@@ -15,7 +15,7 @@ class OrderState(models.TextChoices):
 
 
 class Order(BaseModel):
-    total_price = models.BigIntegerField(default=0)
+    total_price = models.BigIntegerField(default=0, help_text="Total price of the order")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     store = models.ForeignKey(
         Store, on_delete=models.SET_NULL, null=True, blank=True, related_name="orders"
