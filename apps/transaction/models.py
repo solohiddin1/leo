@@ -23,7 +23,7 @@ class Bonus(models.Model):
         verbose_name_plural = 'Bonuses'
 
     def __str__(self):
-        return f"Bonus #{self.pk} - {self.product}"
+        return f"Bonus #{self.pk}-{self.product}-{self.prefix}"
 
 
 class BonusCode(BaseModel):
@@ -51,14 +51,10 @@ class UserSumma(BaseModel):
                               verbose_name="Бонус")
     code = models.OneToOneField(BonusCode, models.CASCADE, related_name='redemption', verbose_name="Код")
     store = models.ForeignKey("shared.Store", on_delete=models.SET_NULL, null=True, related_name="bonus_claims")
-    # Snapshot of Bonus.product at redemption time — Bonus.product may be reassigned later,
-    # and challenge progress must count what the user actually redeemed at the time.
     product = models.ForeignKey(
         Product, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="bonus_redemptions", verbose_name="Mahsulot",
     )
-    # The amount granted at redemption time — Bonus.summa may be edited later, and the
-    # expiry job must give back exactly what was given.
     summa = models.IntegerField(default=0, verbose_name="Сумма")
     status = models.CharField(max_length=20, choices=BonusClaimStatus.choices, default=BonusClaimStatus.PENDING)
     rejection_reason = models.CharField(max_length=255, blank=True)

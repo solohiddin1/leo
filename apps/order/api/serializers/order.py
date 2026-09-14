@@ -20,7 +20,6 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'total_price',
-            'total',
             'state',
             'is_completed',
             'problem_note',

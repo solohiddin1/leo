@@ -20,7 +20,6 @@ class Order(BaseModel):
     store = models.ForeignKey(
         Store, on_delete=models.SET_NULL, null=True, blank=True, related_name="orders"
     )
-    total = models.IntegerField(default=1, verbose_name="общая сумма")
     is_completed = models.BooleanField(default=False)
     state = models.CharField(
         max_length=20,

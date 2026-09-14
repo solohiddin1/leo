@@ -1,7 +1,9 @@
 from django.db import transaction
 from django.db.models import QuerySet
 
+from apps.notification.messages import NotificationMessages
 from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
+from apps.notification.services.notification_service import NotificationService
 from apps.order.models import Order, OrderItem, OrderState
 from apps.user.models import User
 
@@ -27,6 +29,31 @@ class OrderRepo:
         if order.state != OrderState.ACCEPTED:
             order.state = OrderState.ACCEPTED
             order.save(update_fields=["state", "updated_at"])
+
+            user = order.user
+            admin_msg = (
+                f"✅ <b>Buyurtma Qabul Qilindi (Approved)!</b>\n\n"
+                f"<b>Order ID:</b> #{order.id}\n"
+                f"<b>Mijoz:</b> {user.first_name} {user.last_name} (@{user.telegram_username or 'N/A'})\n"
+                f"<b>Summa:</b> {order.total_price} so'm"
+            )
+            AdminTelegramNotifier.send(admin_msg)
+
+            if user.lang == "ru":
+                title = "✅ Заказ принят"
+                body = f"Ваш заказ №#{order.id} подтверждён администратором."
+            else:
+                title = "✅ Buyurtmangiz qabul qilindi"
+                body = f"#{order.id} sonli buyurtmangiz administrator tomonidan tasdiqlandi."
+
+            NotificationService.send_to_user(
+                user=user,
+                title=title,
+                body=body,
+                notification_type="ORDER",
+                data={"order_id": str(order.id), "status": "accepted"},
+            )
+
         return order
 
     @staticmethod
@@ -39,6 +66,30 @@ class OrderRepo:
 
             order.state = OrderState.CANCELLED
             order.save(update_fields=["state", "updated_at"])
+
+            admin_msg = (
+                f"❌ <b>Buyurtma Bekor Qilindi (Rejected)!</b>\n\n"
+                f"<b>Order ID:</b> #{order.id}\n"
+                f"<b>Mijoz:</b> {user.first_name} {user.last_name} (@{user.telegram_username or 'N/A'})\n"
+                f"<b>Qaytarilgan summa:</b> {order.total_price} so'm"
+            )
+            AdminTelegramNotifier.send(admin_msg)
+
+            if user.lang == "ru":
+                title = "❌ Заказ отменён"
+                body = f"Ваш заказ №#{order.id} отменён, {order.total_price} сум возвращено на ваш баланс."
+            else:
+                title = "❌ Buyurtmangiz bekor qilindi"
+                body = f"#{order.id} sonli buyurtmangiz bekor qilindi, {order.total_price} so'm hisobingizga qaytarildi."
+
+            NotificationService.send_to_user(
+                user=user,
+                title=title,
+                body=body,
+                notification_type="ORDER",
+                data={"order_id": str(order.id), "status": "cancelled"},
+            )
+
         return order
 
     @staticmethod
@@ -48,14 +99,30 @@ class OrderRepo:
         order.save(update_fields=["is_completed", "state", "updated_at"])
 
         user = order.user
-        msg = (
-            f"✅ <b>Order Completed!</b>\n\n"
+        admin_msg = (
+            f"🎉 <b>Buyurtma Yakunlandi (Completed)!</b>\n\n"
             f"<b>Order ID:</b> #{order.id}\n"
-            f"<b>Client:</b> {user.first_name} {user.last_name} (@{user.telegram_username or 'N/A'})\n"
+            f"<b>Mijoz:</b> {user.first_name} {user.last_name} (@{user.telegram_username or 'N/A'})\n"
             f"<b>Telegram ID:</b> {user.telegram_id or 'N/A'}\n"
-            f"<b>Total Price:</b> {order.total_price}"
+            f"<b>Summa:</b> {order.total_price} so'm"
         )
-        AdminTelegramNotifier.send(msg)
+        AdminTelegramNotifier.send(admin_msg)
+
+        if user.lang == "ru":
+            title = "🎉 Заказ завершён"
+            body = f"Ваш заказ №#{order.id} успешно завершён."
+        else:
+            title = "🎉 Buyurtma yakunlandi"
+            body = f"#{order.id} sonli buyurtmangiz muvaffaqiyatli yakunlandi."
+
+        NotificationService.send_to_user(
+            user=user,
+            title=title,
+            body=body,
+            notification_type="ORDER",
+            data={"order_id": str(order.id), "status": "completed"},
+        )
+
         return order
 
     @staticmethod
@@ -90,7 +157,6 @@ class OrderRepo:
         order = Order.objects.create(
             user=user,
             total_price=total_price,
-            total=total_price,
             store_id=store_id
         )
 
@@ -109,4 +175,23 @@ class OrderRepo:
         user.save(update_fields=['balance'])
 
         cart_items.delete()
+
+        admin_msg = (
+            f"🆕 <b>Yangi Buyurtma Yaratildi!</b>\n\n"
+            f"<b>Order ID:</b> #{order.id}\n"
+            f"<b>Mijoz:</b> {user.first_name} {user.last_name} (@{user.telegram_username or 'N/A'})\n"
+            f"<b>Telegram ID:</b> {user.telegram_id or 'N/A'}\n"
+            f"<b>Summa:</b> {order.total_price} so'm"
+        )
+        AdminTelegramNotifier.send(admin_msg)
+
+        title, body = NotificationMessages.order_created_msg.render(user.lang, order_id=order.id)
+        NotificationService.send_to_user(
+            user=user,
+            title=title,
+            body=body,
+            notification_type="ORDER",
+            data={"order_id": str(order.id), "status": "created"},
+        )
+
         return order

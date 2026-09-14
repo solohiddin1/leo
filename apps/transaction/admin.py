@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from apps.shared.utils.preview import image_preview_with_no_compressed
 from apps.transaction.models import Bonus, BonusCode, UserSumma, UserSummaImage, Challenge
 
 
@@ -35,7 +36,7 @@ class BonusAdmin(admin.ModelAdmin):
 @admin.register(BonusCode)
 class BonusCodeAdmin(admin.ModelAdmin):
     list_display = ('code', 'bonus_info', 'is_used', 'created_at')
-    list_filter = ('is_used',)
+    list_filter = ('is_used', 'bonus')
     search_fields = ('code',)
     list_select_related = ('bonus', 'bonus__product')
 
@@ -82,4 +83,6 @@ class ChallengeAdmin(admin.ModelAdmin):
 
 @admin.register(UserSummaImage)
 class UserSummaImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user_summa', 'image')
+    list_display = ('id', 'user_summa', 'image', 'image_preview')
+    image_preview = image_preview_with_no_compressed
+    image_preview.short_description = 'Image Preview'

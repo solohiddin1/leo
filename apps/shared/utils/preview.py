@@ -21,3 +21,11 @@ def image_preview_for_product(self, obj):
         '<img src="{}" style="max-height:150px; max-width:150px; object-fit:cover;" />',
         image_file.url,
     )
+
+def image_preview_with_no_compressed(self, obj):
+    if not obj.image:
+        return "-"
+    return format_html(
+        '<img src="{}" style="max-height:150px; max-width:150px; object-fit:cover;" />',
+        obj.image.url,
+    )
