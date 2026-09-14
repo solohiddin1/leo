@@ -1,13 +1,19 @@
 from django.contrib import admin
 
-from apps.order.models import Order, OrderItem
+from apps.order.models import Order, OrderItem, OrderProblemImage
 from apps.order.services.order_service import OrderService
+
+
+class OrderProblemImageInline(admin.TabularInline):
+    model = OrderProblemImage
+    extra = 0
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "total_price", "store", "state", "is_completed")
     list_filter = ("state", "is_completed")
+    inlines = [OrderProblemImageInline]
     actions = ["approve_order", "reject_order"]
 
     @admin.action(description="Tanlanganni tasdiqlash")
@@ -31,6 +37,7 @@ class OrderAdmin(admin.ModelAdmin):
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
+
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):

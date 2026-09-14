@@ -32,6 +32,14 @@ class Order(BaseModel):
         return f"Order #{self.pk}"
 
 
+class OrderProblemImage(BaseModel):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="problem_images")
+    image = models.ImageField(upload_to="order_problems/")
+
+    def __str__(self):
+        return f"ProblemImage for Order #{self.order_id}"
+
+
 class OrderItem(BaseModel):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     user = models.ForeignKey(

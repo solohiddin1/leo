@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 from apps.notification.messages import NotificationMessages
 from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
 from apps.notification.services.notification_service import NotificationService
-from apps.order.models import Order, OrderItem, OrderState
+from apps.order.models import Order, OrderItem, OrderProblemImage, OrderState
 from apps.user.models import User
 
 
@@ -126,9 +126,15 @@ class OrderRepo:
         return order
 
     @staticmethod
-    def report_order_problem(order: Order, problem_note: str) -> Order:
+    def report_order_problem(order: Order, problem_note: str, images: list = None) -> Order:
         order.problem_note = problem_note
         order.save(update_fields=["problem_note", "updated_at"])
+
+        created_images = []
+        if images:
+            for img in images:
+                problem_img = OrderProblemImage.objects.create(order=order, image=img)
+                created_images.append(problem_img)
 
         user = order.user
         msg = (
@@ -139,7 +145,14 @@ class OrderRepo:
             f"<b>Total Price:</b> {order.total_price}\n"
             f"<b>Problem Note:</b> {problem_note or 'No description provided'}"
         )
-        AdminTelegramNotifier.send(msg)
+
+        if created_images:
+            for idx, img_obj in enumerate(created_images):
+                caption = msg if idx == 0 else f"Order #{order.id} problem photo #{idx + 1}"
+                AdminTelegramNotifier.send_photo(img_obj.image, caption=caption)
+        else:
+            AdminTelegramNotifier.send(msg)
+
         return order
 
     @staticmethod

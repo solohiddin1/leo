@@ -59,6 +59,31 @@ class OrderService:
         is_good = serializer.validated_data['is_good']
         problem_note = serializer.validated_data.get('problem_note', '')
 
+        images = request.FILES.getlist('images') or request.FILES.getlist('image')
+        if not images:
+            images = serializer.validated_data.get('images', [])
+
+        if len(images) > 3:
+            return error_response(
+                result=ResultCodes.INVALID_INPUT,
+                message={
+                    "uz": "Maksimal 3 ta rasm yuklash mumkin.",
+                    "ru": "Разрешено максимум 3 изображения.",
+                    "en": "Maximum 3 images allowed.",
+                },
+            )
+
+        for img in images:
+            if img.size > 10 * 1024 * 1024:
+                return error_response(
+                    result=ResultCodes.INVALID_INPUT,
+                    message={
+                        "uz": f"Rasm hajmi 10 MB dan oshmasligi kerak.",
+                        "ru": f"Размер изображения не должен превышать 10 МБ.",
+                        "en": f"Image size cannot exceed 10 MB.",
+                    },
+                )
+
         order = OrderRepo.get_order_by_id(user, order_id)
         if order is None:
             return error_response(ResultCodes.ORDER_NOT_FOUND)
@@ -67,7 +92,7 @@ class OrderService:
             order = OrderRepo.complete_order(order)
             message = "Order marked as completed."
         else:
-            order = OrderRepo.report_order_problem(order, problem_note)
+            order = OrderRepo.report_order_problem(order, problem_note, images=images)
             message = "Order problem reported to admin bot."
 
         serialized = OrderSerializer(order, context={'request': request}).data
