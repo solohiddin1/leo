@@ -1,5 +1,6 @@
 from django.core.cache import cache
 from django.db import transaction
+from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework.request import Request
 
@@ -20,8 +21,11 @@ class BonusService:
 
     @staticmethod
     def _clear_user_balance_cache(user_id: int):
+        from apps.transaction.services.leaderboard_service import LeaderboardService
         cache.delete(BonusService.PENDING_BALANCE_CACHE_KEY.format(user_id=user_id))
         cache.delete(BonusService.TOTAL_EARNED_CACHE_KEY.format(user_id=user_id))
+        cache.delete(LeaderboardService.CACHE_KEY)
+
 
 
     @staticmethod
@@ -221,3 +225,54 @@ class BonusService:
         if store:
             claims = claims.filter(store_id=store)
         return claims
+
+    @staticmethod
+    def get_user_bonus_analytics(user: User, request: Request) -> dict:
+        from_datetime = request.query_params.get('from_datetime')
+        to_datetime = request.query_params.get('to_datetime')
+        search = request.query_params.get('search')
+        store = request.query_params.get('store')
+
+        claims = BonusRepo.get_claims_for_user(user)
+
+        if search:
+            claims = claims.filter(product__name__icontains=search)
+        if store:
+            claims = claims.filter(store_id=store)
+
+        if from_datetime or to_datetime:
+            if from_datetime:
+                claims = claims.filter(created_at__gte=from_datetime)
+            if to_datetime:
+                claims = claims.filter(created_at__lte=to_datetime)
+        else:
+            now = timezone.now()
+            start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            claims = claims.filter(created_at__gte=start_of_month)
+
+        stats = claims.aggregate(
+            total=Count('id'),
+            pending=Count('id', filter=Q(status=BonusClaimStatus.PENDING)),
+            approved=Count('id', filter=Q(status=BonusClaimStatus.APPROVED)),
+            rejected=Count('id', filter=Q(status=BonusClaimStatus.REJECTED)),
+        )
+
+        total = stats['total'] or 0
+        pending = stats['pending'] or 0
+        approved = stats['approved'] or 0
+        rejected = stats['rejected'] or 0
+
+        def calc_pct(val: int, total_val: int) -> float:
+            if not total_val:
+                return 0.0
+            return round((val / total_val) * 100, 2)
+
+        return {
+            'total_redeemed': total,
+            'pending_count': pending,
+            'pending_percentage': calc_pct(pending, total),
+            'approved_count': approved,
+            'approved_percentage': calc_pct(approved, total),
+            'rejected_count': rejected,
+            'rejected_percentage': calc_pct(rejected, total),
+        }

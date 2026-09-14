@@ -50,6 +50,10 @@ class BonusHistoryView(GenericAPIView):
 
     def get(self, request):
         claims = BonusService.get_user_bonuses(request.user, self.request)
+        analytics = BonusService.get_user_bonus_analytics(request.user, self.request)
         page = self.paginate_queryset(claims)
+        if self.paginator is not None:
+            self.paginator.extra_data = {'analytics': analytics}
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
