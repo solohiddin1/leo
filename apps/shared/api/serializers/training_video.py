@@ -8,10 +8,8 @@ class TrainingVideoSerializer(serializers.ModelSerializer):
         model = TrainingVideo
         fields = [
             "id",
-            "name",
             "name_uz",
             "name_ru",
-            "description",
             "description_uz",
             "description_ru",
             "youtube_url",
