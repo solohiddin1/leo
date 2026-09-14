@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from apps.product.admin import image_preview
-from apps.shared.models import Banner, Region, SiteConfig, Store
+from apps.product.translation import CustomAdmin
+from apps.shared.models import AppInfo, Banner, FAQ, Region, SiteConfig, Store
 
 
 @admin.register(Region)
@@ -27,3 +28,23 @@ class BannerAdmin(admin.ModelAdmin):
     readonly_fields = ('image_compressed', )
 
     image_preview = image_preview
+
+
+@admin.register(AppInfo)
+class AppInfoAdmin(CustomAdmin):
+    list_display = (
+        "id",
+        "telegram_support_username",
+        "call_center_phones",
+        "email_support",
+        "working_hours_uz",
+        "working_hours_ru",
+        "updated_at",
+    )
+
+
+@admin.register(FAQ)
+class FAQAdmin(CustomAdmin):
+    list_display = ("id", "question_uz", "question_ru", "ordering", "is_active")
+    list_editable = ("ordering", "is_active")
+    search_fields = ("question_uz", "question_ru", "answer_uz", "answer_ru")

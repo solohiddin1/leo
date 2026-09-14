@@ -57,3 +57,44 @@ class Banner(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+def default_call_center_phones():
+    return ["+998 99 653 33 66"]
+
+
+class AppInfo(BaseModel):
+    telegram_support_username = models.CharField(
+        max_length=255, blank=True, default="@LEO_OFFICE3366"
+    )
+    call_center_phones = models.JSONField(
+        default=default_call_center_phones, blank=True
+    )
+    email_support = models.CharField(
+        max_length=255, blank=True, default="shoikrom@bk.ru"
+    )
+    working_hours = models.CharField(
+        max_length=255, blank=True, default="Dushanba-Shanba, 09:00 - 18:00"
+    )
+
+    class Meta:
+        verbose_name = "App Info"
+        verbose_name_plural = "App Info"
+
+    def __str__(self):
+        return f"App Info ({self.pk})"
+
+
+class FAQ(BaseModel):
+    question = models.CharField(max_length=500)
+    answer = models.TextField()
+    ordering = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["ordering", "-created_at"]
+        verbose_name = "FAQ"
+        verbose_name_plural = "FAQs"
+
+    def __str__(self):
+        return self.question
