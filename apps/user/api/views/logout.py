@@ -8,6 +8,7 @@ from apps.shared.utils.result_codes import ResultCodes
 from apps.shared.utils.utils import error_response, success_response
 from apps.user.api.serializers.logout import LogoutSerializer
 from apps.user.models import User
+from apps.user.services.device_service import DeviceService
 
 
 class LogoutAPIView(GenericAPIView):
@@ -23,4 +24,9 @@ class LogoutAPIView(GenericAPIView):
             RefreshToken(serializer.validated_data["refresh_token"]).blacklist()
         except TokenError:
             return error_response(ResultCodes.INVALID_TOKEN_ERROR)
+
+        device_id = serializer.validated_data.get("device_id")
+        if device_id:
+            DeviceService.deactivate_by_device_id(request.user, device_id)
+
         return success_response()

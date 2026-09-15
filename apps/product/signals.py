@@ -62,7 +62,8 @@ def track_product_image_changes(sender, instance, **kwargs):
 
         if instance._image_changed:
             instance._old_image = old_instance.image.path if old_instance.image else None
-            instance._old_image_compressed = old_instance.image_compressed.path if old_instance.image_compressed else None
+            instance._old_image_compressed = old_instance.image_compressed.path\
+                if old_instance.image_compressed else None
     except sender.DoesNotExist:
         instance._image_changed = bool(instance.image)
 
