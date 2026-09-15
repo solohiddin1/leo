@@ -11,6 +11,9 @@ class UserRedeemedStoreListView(ListAPIView):
     serializer_class = StoreSerializer
 
     def get_queryset(self):
+        all_stores = self.request.query_params.get("all_stores", "").lower() == "true"
+        if all_stores:
+            return Store.objects.all()
         return Store.objects.filter(bonus_claims__user=self.request.user).distinct()
 
     def list(self, request, *args, **kwargs):
