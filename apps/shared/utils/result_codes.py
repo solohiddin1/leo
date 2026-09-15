@@ -37,6 +37,10 @@ class ResultCodes(Enum):
     CLAIM_NOT_FOUND = -32
     DEVICE_NOT_FOUND = -33
     NOTIFICATION_NOT_FOUND = -34
+    LINK_EXPIRED = -35
+    INVALID_REQUEST = -36
+    INVALID_OTP = -37
+
 
 
 ResultMessages = {
@@ -215,4 +219,25 @@ ResultMessages = {
         "en": "Notification not found.",
         "ru": "Уведомление не найдено.",
     },
+    "LINK_EXPIRED": {
+        "en": "This link has expired. Please request a new one.",
+        "ru": "Срок действия ссылки истёк. Запросите новую.",
+        "uz": "Havola muddati tugagan. Yangisini so'rang.",
+    },
+    "INVALID_REQUEST": {
+        "en": "Invalid request. Please try again.",
+        "ru": "Неверный запрос. Попробуйте снова.",
+        "uz": "Noto'g'ri so'rov. Qaytadan urinib ko'ring.",
+    },
+    "INVALID_OTP": {
+        "en": "Incorrect verification code.",
+        "ru": "Неверный код подтверждения.",
+        "uz": "Tasdiqlash kodi noto'g'ri.",
+    },
+}
+
+ERROR_CODE_MAP = {
+    "expired": ResultCodes.LINK_EXPIRED,
+    "invalid": ResultCodes.INVALID_INPUT,
+    "invalid_otp": ResultCodes.INVALID_OTP,
 }

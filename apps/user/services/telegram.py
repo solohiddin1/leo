@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from apps.shared.middleware.middleware import get_logger
 from apps.shared.models import SiteConfig
+from apps.shared.utils.result_codes import ResultCodes
 from apps.user.repositories.sms import SmsRepo
 from apps.user.repositories.telegram import TelegramRepo
 from apps.user.repositories.user_repo import UserRepo

@@ -4,13 +4,13 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.shared.utils.result_codes import ResultCodes
+from apps.shared.utils.result_codes import ResultCodes, ERROR_CODE_MAP
 from apps.shared.utils.utils import error_response, success_response
 from apps.user.api.serializers.telegram_otp_verify import TelegramOtpVerifySerializer
 from apps.user.services.telegram import TgOtpService
 
 
-@extend_schema(exclude=True)
+@extend_schema(tags=['user'])
 class TelegramOtpView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = None
@@ -64,7 +64,7 @@ class TelegramOtpVerifyView(GenericAPIView):
         otp = request.data.get("otp")
         if not token or not otp:
             return error_response(
-                ResultCodes.UNKNOWN_ERROR,
+                ResultCodes.INVALID_REQUEST,
                 {
                     "en": "token and otp required",
                     "ru": "token and otp required",
@@ -73,8 +73,8 @@ class TelegramOtpVerifyView(GenericAPIView):
             )
         result = TgOtpService.verify_otp(token, otp)
         if "error" in result:
+            error_key = result["error"]
             return error_response(
-                ResultCodes.UNKNOWN_ERROR,
-                {"en": result["error"], "ru": result["error"], "uz": result["error"]},
+                ERROR_CODE_MAP.get(error_key, ResultCodes.UNKNOWN_ERROR),
             )
         return success_response(result)
