@@ -6,7 +6,7 @@ from apps.user.models import Device, Job, Otp, TelegramLoginToken, User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("username", "first_name", "last_name", "email")
+    list_display = ("username", "first_name", "last_name", "balance", "email")
     exclude = ('password',)
 
 @admin.register(Otp)

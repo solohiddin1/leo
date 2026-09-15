@@ -23,7 +23,6 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
         ("uz", "Uzbek"),
         ("ru", "Russian"),
     )
-    main_balance = models.FloatField(default=0)
     balance = models.BigIntegerField(default=0)
     is_verified = models.BooleanField(default=False)
     otp_sent_count = models.IntegerField(default=0)

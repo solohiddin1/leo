@@ -1,7 +1,15 @@
-from django.contrib import admin
+from django import forms
+from django.contrib import admin, messages
+from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
+from django.shortcuts import render
 
 from apps.shared.utils.preview import image_preview_with_no_compressed
 from apps.transaction.models import Bonus, BonusCode, UserSumma, UserSummaImage, Challenge
+from apps.transaction.services.bonus_service import BonusService
+
+
+class RejectClaimForm(forms.Form):
+    reason = forms.CharField(label='Rejection reason', widget=forms.Textarea, max_length=255)
 
 
 class BonusCodeInline(admin.TabularInline):
@@ -53,20 +61,74 @@ class UserSummaImageInline(admin.TabularInline):
 
 @admin.register(UserSumma)
 class UserSummaAdmin(admin.ModelAdmin):
-    list_display = ('user', 'get_code', 'product', 'summa', 'is_expired', 'created_at')
+    list_display = ('user', 'get_code', 'product', 'status', 'summa', 'is_expired', 'created_at')
     list_filter = ('is_expired', 'product')
     search_fields = ('code__code', 'user__username')
     readonly_fields = ('user', 'bonus', 'code', 'product', 'summa', 'created_at')
     list_select_related = ('user', 'bonus', 'code', 'product')
     inlines = [UserSummaImageInline]
-    actions = ['approve_bonus_codes']
+    actions = ['approve_bonus_codes', 'reject_bonus_codes']
 
     def get_code(self, obj):
         return obj.code.code
     get_code.short_description = 'Code'
 
     def approve_bonus_codes(self, request, queryset):
-        queryset.update(status="approved")
+        approved = failed = 0
+        for claim in queryset:
+            response = BonusService.approve_claim(claim.id, request.user)
+            if response.status_code == 200:
+                approved += 1
+            else:
+                failed += 1
+
+        if approved:
+            self.message_user(request, f"{approved} claim(s) approved.", level=messages.SUCCESS)
+        if failed:
+            self.message_user(
+                request, f"{failed} claim(s) could not be approved (not pending).", level=messages.WARNING,
+            )
+    approve_bonus_codes.short_description = 'Approve bonus claims'
+
+    def reject_bonus_codes(self, request, queryset):
+        if 'apply' in request.POST:
+            form = RejectClaimForm(request.POST)
+            if form.is_valid():
+                reason = form.cleaned_data['reason']
+                rejected = failed = 0
+                for claim in queryset:
+                    response = BonusService.reject_claim(claim.id, request.user, reason)
+                    if response.status_code == 200:
+                        rejected += 1
+                    else:
+                        failed += 1
+
+                if rejected:
+                    self.message_user(request, f"{rejected} claim(s) rejected.", level=messages.SUCCESS)
+                if failed:
+                    self.message_user(
+                        request, f"{failed} claim(s) could not be rejected (not pending).", level=messages.WARNING,
+                    )
+                return None
+        else:
+            form = RejectClaimForm()
+
+        return render(
+            request,
+            'admin/transaction/reject_claims_confirmation.html',
+            context={
+                'claims': queryset,
+                'form': form,
+                'action_checkbox_name': ACTION_CHECKBOX_NAME,
+            },
+        )
+    reject_bonus_codes.short_description = 'Reject bonus claims'
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
 
 @admin.register(Challenge)
 class ChallengeAdmin(admin.ModelAdmin):

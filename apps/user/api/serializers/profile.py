@@ -23,7 +23,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "username",
             "first_name",
             "last_name",
-            "main_balance",
             "balance",
             "telegram_username",
             "lang",
