@@ -70,6 +70,7 @@ class BonusService:
                 if not store:
                     return error_response(ResultCodes.STORE_NOT_FOUND)
 
+
             user_summa = BonusRepo.create_claim(user, bonus, bonus_code, store)
 
             if images:
