@@ -44,6 +44,6 @@ class CheckCodeView(GenericAPIView):
         return BonusService.redeem_bonus(
             user=request.user,
             raw_code=serializer.validated_data['code'],
-            store_id=serializer.validated_data['store_id'],
+            store_id=serializer.validated_data.get('store_id'),
             images=request.FILES.getlist('images')
         )

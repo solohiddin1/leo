@@ -11,7 +11,7 @@ class BonusCheckResponseSerializer(serializers.Serializer):
 
 class BonusRedeemSerializer(serializers.Serializer):
     code = serializers.CharField(help_text="Printed bonus code, e.g. LEOB0001")
-    store_id = serializers.IntegerField(required=False)
+    store_id = serializers.IntegerField(required=False, default=None)
     images = serializers.ListField(
         child=serializers.ImageField(),
         required=True,
