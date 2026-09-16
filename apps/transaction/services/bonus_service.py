@@ -82,7 +82,7 @@ class BonusService:
             BonusService._clear_user_balance_cache(user.id)
 
             transaction.on_commit(
-                lambda: BonusService._notify_bonus_code_registered(user, bonus_code, bonus)
+                lambda: BonusService._notify_bonus_code_registered(user, bonus_code, user_summa.summa)
             )
 
             return success_response({
@@ -92,12 +92,12 @@ class BonusService:
             })
 
     @staticmethod
-    def _notify_bonus_code_registered(user: User, bonus_code: BonusCode, bonus) -> None:
+    def _notify_bonus_code_registered(user: User, bonus_code: BonusCode, awarded_summa: int) -> None:
         from apps.notification.messages import NotificationMessages
         from apps.notification.services.notification_service import NotificationService
 
         msg = NotificationMessages.bonus_create_msg
-        title, body = msg.render(user.lang, code=bonus_code.code, summa=bonus.summa)
+        title, body = msg.render(user.lang, code=bonus_code.code, summa=awarded_summa)
         NotificationService.send_to_user(
             user=user,
             title=title,
@@ -106,7 +106,7 @@ class BonusService:
             data={
                 "type": msg.type.value,
                 "code": bonus_code.code,
-                "awarded": bonus.summa,
+                "awarded": awarded_summa,
                 "status": BonusClaimStatus.PENDING,
             },
         )
