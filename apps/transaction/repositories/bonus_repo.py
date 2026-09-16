@@ -20,7 +20,7 @@ class BonusRepo:
         bonus_code.save(update_fields=['is_used'])
 
     @staticmethod
-    def create_claim(user: User, bonus: Bonus, code: BonusCode, store: Store) -> UserSumma:
+    def create_claim(user: User, bonus: Bonus, code: BonusCode, store: Store = None) -> UserSumma:
         return UserSumma.objects.create(
             user=user,
             bonus=bonus,

@@ -43,7 +43,7 @@ class BonusService:
         return success_response({'summa': bonus_code.bonus.summa})
 
     @staticmethod
-    def redeem_bonus(user: User, raw_code: str, store_id: int, images=None):
+    def redeem_bonus(user: User, raw_code: str, store_id: int = None, images=None):
         raw_code = raw_code.strip().upper()
 
         required_count = 3
@@ -65,9 +65,10 @@ class BonusService:
             if not bonus:
                 return error_response(ResultCodes.BONUS_CODE_INVALID)
 
-            store = StoreRepo.get_by_id(store_id)
-            if not store:
-                return error_response(ResultCodes.STORE_NOT_FOUND)
+            if store_id:
+                store = StoreRepo.get_by_id(store_id)
+                if not store:
+                    return error_response(ResultCodes.STORE_NOT_FOUND)
 
             user_summa = BonusRepo.create_claim(user, bonus, bonus_code, store)
 
