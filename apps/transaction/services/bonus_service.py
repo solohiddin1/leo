@@ -65,6 +65,7 @@ class BonusService:
             if not bonus:
                 return error_response(ResultCodes.BONUS_CODE_INVALID)
 
+            store = None
             if store_id:
                 store = StoreRepo.get_by_id(store_id)
                 if not store:
