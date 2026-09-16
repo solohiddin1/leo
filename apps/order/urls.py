@@ -2,6 +2,7 @@ from django.urls import path
 
 from apps.order.api.views.cart import CartView
 from apps.order.api.views.cart_item import CartItemAddView, CartItemView
+from apps.order.api.views.confirm_order import OrderConfirmView
 from apps.order.api.views.create_order import OrderCreateView
 from apps.order.api.views.get_orders import OrdersView
 
@@ -11,4 +12,5 @@ urlpatterns = [
     path("cart/items/<int:item_id>/", CartItemView.as_view()),
     path("order/create_order/", OrderCreateView.as_view()),
     path("order/orders/", OrdersView.as_view()),
+    path("order/confirm/", OrderConfirmView.as_view()),
 ]
