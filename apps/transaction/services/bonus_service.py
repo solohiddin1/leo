@@ -88,7 +88,7 @@ class BonusService:
             return success_response({
                 'balance': user.balance,
                 'pending_balance': BonusService.get_user_pending_balance(user),
-                'awarded': bonus.summa
+                'awarded': user_summa.summa
             })
 
     @staticmethod

@@ -21,13 +21,17 @@ class BonusRepo:
 
     @staticmethod
     def create_claim(user: User, bonus: Bonus, code: BonusCode, store: Store = None) -> UserSumma:
+        summa = bonus.summa
+        if store and store.bonus_boost_percentage:
+            summa += bonus.summa * store.bonus_boost_percentage // 100
+
         return UserSumma.objects.create(
             user=user,
             bonus=bonus,
             code=code,
             store=store,
             product=bonus.product,
-            summa=bonus.summa,
+            summa=summa,
         )
 
     @staticmethod
