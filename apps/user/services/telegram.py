@@ -218,7 +218,15 @@ class TgOtpService:
 
     @classmethod
     def handle_update(cls, update):
+        if "callback_query" in update:
+            cls._handle_callback_query(update["callback_query"])
+            return
+
         message = update.get("message") or {}
+        if message.get("reply_to_message"):
+            cls._handle_reply_message(message)
+            return
+
         frm = message.get("from") or {}
         telegram_id = frm.get("id")
         if not telegram_id:
@@ -234,6 +242,127 @@ class TgOtpService:
         text = message.get("text") or ""
         if text.startswith("/start"):
             cls._handle_start(chat_id, telegram_id, frm, text)
+
+    @classmethod
+    def _handle_callback_query(cls, cb):
+        from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
+        from apps.order.models import Order, OrderState
+        from apps.order.repositories.order_repo import OrderRepo
+        from apps.transaction.models import UserSumma, BonusClaimStatus
+        from apps.transaction.services.bonus_service import BonusService
+
+        cb_id = cb.get("id")
+        data = cb.get("data") or ""
+        message = cb.get("message") or {}
+        chat_id = (message.get("chat") or {}).get("id")
+        msg_id = message.get("message_id")
+        from_user = cb.get("from") or {}
+        admin_username = from_user.get("username") or from_user.get("first_name") or "Admin"
+
+        if data.startswith("approve_order_"):
+            try:
+                order_id = int(data.replace("approve_order_", ""))
+                order = Order.objects.filter(id=order_id).first()
+                if not order:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text="Buyurtma topilmadi", show_alert=True)
+                    return
+                if order.state != OrderState.PENDING:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Buyurtma allaqachon {order.state} holatida", show_alert=True)
+                    return
+                OrderRepo.approve_order(order)
+                AdminTelegramNotifier.answer_callback_query(cb_id, text="✅ Buyurtma tasdiqlandi!")
+                if chat_id and msg_id:
+                    new_text = (message.get("text") or message.get("caption") or f"Order #{order_id}") + f"\n\n✅ <b>Tasdiqlandi (@{admin_username})</b>"
+                    if message.get("caption"):
+                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text)
+                    else:
+                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text)
+            except Exception as e:
+                logger.warning(f"Error in approve_order callback: {e}")
+
+        elif data.startswith("reject_order_"):
+            try:
+                order_id = int(data.replace("reject_order_", ""))
+                order = Order.objects.filter(id=order_id).first()
+                if not order:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text="Buyurtma topilmadi", show_alert=True)
+                    return
+                if order.state != OrderState.PENDING:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Buyurtma allaqachon {order.state} holatida", show_alert=True)
+                    return
+                AdminTelegramNotifier.answer_callback_query(cb_id, text="Iltimos, bekor qilish sababini kiriting")
+                prompt_text = f"❌ Buyurtma #{order_id} bekor qilish sababini ushbu xabarga reply tarzida yozing:"
+                force_reply = {"force_reply": True, "selective": True}
+                AdminTelegramNotifier.send(prompt_text, reply_markup=force_reply)
+            except Exception as e:
+                logger.warning(f"Error in reject_order callback: {e}")
+
+        elif data.startswith("approve_bonus_"):
+            try:
+                claim_id = int(data.replace("approve_bonus_", ""))
+                claim = UserSumma.objects.filter(id=claim_id).first()
+                if not claim:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text="Ariza topilmadi", show_alert=True)
+                    return
+                if claim.status != BonusClaimStatus.PENDING:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Ariza allaqachon {claim.status} holatida", show_alert=True)
+                    return
+                BonusService.approve_claim(claim_id, admin_user=None)
+                AdminTelegramNotifier.answer_callback_query(cb_id, text="✅ Bonus ariza tasdiqlandi!")
+                if chat_id and msg_id:
+                    new_text = (message.get("text") or message.get("caption") or f"Claim #{claim_id}") + f"\n\n✅ <b>Tasdiqlandi (@{admin_username})</b>"
+                    if message.get("caption"):
+                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text)
+                    else:
+                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text)
+            except Exception as e:
+                logger.warning(f"Error in approve_bonus callback: {e}")
+
+        elif data.startswith("reject_bonus_"):
+            try:
+                claim_id = int(data.replace("reject_bonus_", ""))
+                claim = UserSumma.objects.filter(id=claim_id).first()
+                if not claim:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text="Ariza topilmadi", show_alert=True)
+                    return
+                if claim.status != BonusClaimStatus.PENDING:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Ariza allaqachon {claim.status} holatida", show_alert=True)
+                    return
+                AdminTelegramNotifier.answer_callback_query(cb_id, text="Iltimos, bekor qilish sababini kiriting")
+                prompt_text = f"❌ Bonus ariza #{claim_id} bekor qilish sababini ushbu xabarga reply tarzida yozing:"
+                force_reply = {"force_reply": True, "selective": True}
+                AdminTelegramNotifier.send(prompt_text, reply_markup=force_reply)
+            except Exception as e:
+                logger.warning(f"Error in reject_bonus callback: {e}")
+
+    @classmethod
+    def _handle_reply_message(cls, message):
+        import re
+
+        from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
+        from apps.order.models import Order
+        from apps.order.repositories.order_repo import OrderRepo
+        from apps.transaction.services.bonus_service import BonusService
+
+        reply_to = message.get("reply_to_message") or {}
+        parent_text = reply_to.get("text") or reply_to.get("caption") or ""
+        reason = (message.get("text") or "").strip()
+
+        order_match = re.search(r"Buyurtma\s+#(\d+)\s+bekor\s+qilish", parent_text)
+        if order_match:
+            order_id = int(order_match.group(1))
+            order = Order.objects.filter(id=order_id).first()
+            if order:
+                OrderRepo.reject_order(order)
+                AdminTelegramNotifier.send(f"❌ Buyurtma #{order_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
+            return
+
+        bonus_match = re.search(r"Bonus\s+ariza\s+#(\d+)\s+bekor\s+qilish", parent_text)
+        if bonus_match:
+            claim_id = int(bonus_match.group(1))
+            BonusService.reject_claim(claim_id, admin_user=None, reason=reason)
+            AdminTelegramNotifier.send(f"❌ Bonus ariza #{claim_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
+            return
 
     @staticmethod
     def _success_msg():

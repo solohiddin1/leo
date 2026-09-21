@@ -1,6 +1,8 @@
+import json as json_lib
+from concurrent.futures import ThreadPoolExecutor
+
 import requests
 from django.conf import settings
-from concurrent.futures import ThreadPoolExecutor
 
 from apps.shared.middleware.middleware import get_logger
 
@@ -9,6 +11,10 @@ executor = ThreadPoolExecutor(max_workers=2)
 
 
 class AdminTelegramNotifier:
+
+    @classmethod
+    def get_token(cls) -> str:
+        return settings.TELEGRAM_ADMIN_BOT_TOKEN or settings.TELEGRAM_BOT_TOKEN or ""
 
     @staticmethod
     def send_heavy_request(url: str, data: dict):
@@ -25,24 +31,38 @@ class AdminTelegramNotifier:
             logger.warning(f"Background HTTP sendPhoto request failed: {exc}")
 
     @classmethod
-    def send(cls, text: str) -> None:
-        if not settings.TELEGRAM_ADMIN_BOT_TOKEN or not settings.TELEGRAM_ADMIN_CHAT_ID:
+    def send(cls, text: str, reply_markup: dict = None) -> None:
+        token = cls.get_token()
+        if not token or not settings.TELEGRAM_ADMIN_CHAT_ID:
             return
         try:
-            url = f"https://api.telegram.org/bot{settings.TELEGRAM_ADMIN_BOT_TOKEN}/sendMessage"
-            json = {"chat_id": settings.TELEGRAM_ADMIN_CHAT_ID, "text": text, "parse_mode": "HTML"}
-            executor.submit(cls.send_heavy_request, url, data=json)
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            payload = {
+                "chat_id": settings.TELEGRAM_ADMIN_CHAT_ID,
+                "text": text,
+                "parse_mode": "HTML",
+            }
+            if reply_markup is not None:
+                payload["reply_markup"] = reply_markup
+            executor.submit(cls.send_heavy_request, url, data=payload)
             logger.info(f"Notified admin telegram chat: {text}")
         except Exception as exc:
             logger.warning(f"Failed to notify admin telegram chat: {exc}")
 
     @classmethod
-    def send_photo(cls, photo_file, caption: str = "") -> None:
-        if not settings.TELEGRAM_ADMIN_BOT_TOKEN or not settings.TELEGRAM_ADMIN_CHAT_ID:
+    def send_photo(cls, photo_file, caption: str = "", reply_markup: dict = None) -> None:
+        token = cls.get_token()
+        if not token or not settings.TELEGRAM_ADMIN_CHAT_ID:
             return
         try:
-            url = f"https://api.telegram.org/bot{settings.TELEGRAM_ADMIN_BOT_TOKEN}/sendPhoto"
-            data = {"chat_id": settings.TELEGRAM_ADMIN_CHAT_ID, "caption": caption, "parse_mode": "HTML"}
+            url = f"https://api.telegram.org/bot{token}/sendPhoto"
+            data = {
+                "chat_id": settings.TELEGRAM_ADMIN_CHAT_ID,
+                "caption": caption,
+                "parse_mode": "HTML",
+            }
+            if reply_markup is not None:
+                data["reply_markup"] = json_lib.dumps(reply_markup)
 
             file_content = None
             filename = "photo.jpg"
@@ -69,3 +89,56 @@ class AdminTelegramNotifier:
             logger.info(f"Sent photo to admin telegram chat: {caption}")
         except Exception as exc:
             logger.warning(f"Failed to send photo to admin telegram chat: {exc}")
+
+    @classmethod
+    def answer_callback_query(cls, callback_query_id: str, text: str = None, show_alert: bool = False):
+        token = cls.get_token()
+        if not token or not callback_query_id:
+            return
+        try:
+            url = f"https://api.telegram.org/bot{token}/answerCallbackQuery"
+            payload = {"callback_query_id": callback_query_id}
+            if text:
+                payload["text"] = text
+                payload["show_alert"] = show_alert
+            executor.submit(cls.send_heavy_request, url, data=payload)
+        except Exception as exc:
+            logger.warning(f"Failed to answer callback query: {exc}")
+
+    @classmethod
+    def edit_message_text(cls, chat_id, message_id, text: str, reply_markup: dict = None):
+        token = cls.get_token()
+        if not token or not chat_id or not message_id:
+            return
+        try:
+            url = f"https://api.telegram.org/bot{token}/editMessageText"
+            payload = {
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "text": text,
+                "parse_mode": "HTML",
+            }
+            if reply_markup is not None:
+                payload["reply_markup"] = reply_markup
+            executor.submit(cls.send_heavy_request, url, data=payload)
+        except Exception as exc:
+            logger.warning(f"Failed to edit message text: {exc}")
+
+    @classmethod
+    def edit_message_caption(cls, chat_id, message_id, caption: str, reply_markup: dict = None):
+        token = cls.get_token()
+        if not token or not chat_id or not message_id:
+            return
+        try:
+            url = f"https://api.telegram.org/bot{token}/editMessageCaption"
+            payload = {
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "caption": caption,
+                "parse_mode": "HTML",
+            }
+            if reply_markup is not None:
+                payload["reply_markup"] = reply_markup
+            executor.submit(cls.send_heavy_request, url, data=payload)
+        except Exception as exc:
+            logger.warning(f"Failed to edit message caption: {exc}")

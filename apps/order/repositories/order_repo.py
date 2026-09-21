@@ -183,7 +183,15 @@ class OrderRepo:
             f"<b>Telegram ID:</b> {user.telegram_id or 'N/A'}\n"
             f"<b>Summa:</b> {order.total_price} so'm"
         )
-        AdminTelegramNotifier.send(admin_msg)
+        reply_markup = {
+            "inline_keyboard": [
+                [
+                    {"text": "✅ Tasdiqlash", "callback_data": f"approve_order_{order.id}"},
+                    {"text": "❌ Bekor qilish", "callback_data": f"reject_order_{order.id}"},
+                ]
+            ]
+        }
+        AdminTelegramNotifier.send(admin_msg, reply_markup=reply_markup)
 
         title, body = NotificationMessages.order_created_msg.render(user.lang, order_id=order.id)
         NotificationService.send_to_user(

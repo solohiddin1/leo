@@ -82,7 +82,7 @@ class BonusService:
             BonusService._clear_user_balance_cache(user.id)
 
             transaction.on_commit(
-                lambda: BonusService._notify_bonus_code_registered(user, bonus_code, user_summa.summa)
+                lambda: BonusService._notify_bonus_code_registered(user, bonus_code, user_summa.summa, claim_id=user_summa.id)
             )
 
             return success_response({
@@ -131,7 +131,7 @@ class BonusService:
             })
 
     @staticmethod
-    def _notify_bonus_code_registered(user: User, bonus_code: BonusCode, awarded_summa: int) -> None:
+    def _notify_bonus_code_registered(user: User, bonus_code: BonusCode, awarded_summa: int, claim_id: int = None) -> None:
         from apps.notification.messages import NotificationMessages
         from apps.notification.services.notification_service import NotificationService
 
@@ -149,7 +149,7 @@ class BonusService:
                 "status": BonusClaimStatus.PENDING,
             },
         )
-        BonusService.notify_code_used(bonus_code, user)
+        BonusService.notify_code_used(bonus_code, user, claim_id=claim_id)
 
     @staticmethod
     def approve_claim(claim_id: int, admin_user: User):
@@ -253,10 +253,13 @@ class BonusService:
         })
 
     @staticmethod
-    def notify_code_used(code: BonusCode, user: User = None):
+    def notify_code_used(code: BonusCode, user: User = None, claim_id: int = None):
 
         if not user and hasattr(code, "redemption") and code.redemption:
             user = code.redemption.user
+
+        if not claim_id and hasattr(code, "redemption") and code.redemption:
+            claim_id = code.redemption.id
 
         user_name = f"{user.first_name} {user.last_name}".strip() if user else "N/A"
         user_phone = user.username if user else "N/A"
@@ -277,7 +280,21 @@ class BonusService:
             f"• User: {user_name or 'N/A'}\n"
             f"• Phone: {user_phone}"
         )
-        AdminTelegramNotifier.send(msg)
+        if claim_id:
+            msg += f"\n• Claim ID: #{claim_id}"
+
+        reply_markup = None
+        if claim_id:
+            reply_markup = {
+                "inline_keyboard": [
+                    [
+                        {"text": "✅ Tasdiqlash", "callback_data": f"approve_bonus_{claim_id}"},
+                        {"text": "❌ Bekor qilish", "callback_data": f"reject_bonus_{claim_id}"},
+                    ]
+                ]
+            }
+
+        AdminTelegramNotifier.send(msg, reply_markup=reply_markup)
 
     @staticmethod
     def get_user_bonuses(user: User, request: Request):
