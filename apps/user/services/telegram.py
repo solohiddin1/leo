@@ -292,7 +292,7 @@ class TgOtpService:
                     AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Buyurtma allaqachon {order.state} holatida", show_alert=True)
                     return
                 AdminTelegramNotifier.answer_callback_query(cb_id, text="Iltimos, bekor qilish sababini kiriting")
-                prompt_text = f"❌ Buyurtma #{order_id} bekor qilish sababini ushbu xabarga reply tarzida yozing:"
+                prompt_text = f"❌ Buyurtma #{order_id} bekor qilish sababini ushbu xabarga reply tarzida yozing (msg:{msg_id}):"
                 force_reply = {"force_reply": True, "selective": True}
                 AdminTelegramNotifier.send(prompt_text, reply_markup=force_reply)
             except Exception as e:
@@ -330,7 +330,7 @@ class TgOtpService:
                     AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Ariza allaqachon {claim.status} holatida", show_alert=True)
                     return
                 AdminTelegramNotifier.answer_callback_query(cb_id, text="Iltimos, bekor qilish sababini kiriting")
-                prompt_text = f"❌ Bonus ariza #{claim_id} bekor qilish sababini ushbu xabarga reply tarzida yozing:"
+                prompt_text = f"❌ Bonus ariza #{claim_id} bekor qilish sababini ushbu xabarga reply tarzida yozing (msg:{msg_id}):"
                 force_reply = {"force_reply": True, "selective": True}
                 AdminTelegramNotifier.send(prompt_text, reply_markup=force_reply)
             except Exception as e:
@@ -348,20 +348,39 @@ class TgOtpService:
         reply_to = message.get("reply_to_message") or {}
         parent_text = reply_to.get("text") or reply_to.get("caption") or ""
         reason = (message.get("text") or "").strip()
+        chat_id = (message.get("chat") or {}).get("id")
+        from_user = message.get("from") or {}
+        admin_username = from_user.get("username") or from_user.get("first_name") or "Admin"
 
-        order_match = re.search(r"Buyurtma\s+#(\d+)\s+bekor\s+qilish", parent_text)
+        order_match = re.search(r"Buyurtma\s+#(\d+)\s+bekor\s+qilish.*\(msg:(\d+)\)", parent_text)
+        if not order_match:
+            order_match = re.search(r"Buyurtma\s+#(\d+)\s+bekor\s+qilish", parent_text)
+
         if order_match:
             order_id = int(order_match.group(1))
+            orig_msg_id = int(order_match.group(2)) if len(order_match.groups()) > 1 and order_match.group(2) else None
             order = Order.objects.filter(id=order_id).first()
             if order:
                 OrderRepo.reject_order(order)
+                if chat_id and orig_msg_id:
+                    status_text = f"Buyurtma #{order_id}\n\n❌ <b>Bekor qilindi (@{admin_username})</b>\n<b>Sabab:</b> {reason}"
+                    AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text)
+                    AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text)
                 AdminTelegramNotifier.send(f"❌ Buyurtma #{order_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
             return
 
-        bonus_match = re.search(r"Bonus\s+ariza\s+#(\d+)\s+bekor\s+qilish", parent_text)
+        bonus_match = re.search(r"Bonus\s+ariza\s+#(\d+)\s+bekor\s+qilish.*\(msg:(\d+)\)", parent_text)
+        if not bonus_match:
+            bonus_match = re.search(r"Bonus\s+ariza\s+#(\d+)\s+bekor\s+qilish", parent_text)
+
         if bonus_match:
             claim_id = int(bonus_match.group(1))
+            orig_msg_id = int(bonus_match.group(2)) if len(bonus_match.groups()) > 1 and bonus_match.group(2) else None
             BonusService.reject_claim(claim_id, admin_user=None, reason=reason)
+            if chat_id and orig_msg_id:
+                status_text = f"Bonus ariza #{claim_id}\n\n❌ <b>Bekor qilindi (@{admin_username})</b>\n<b>Sabab:</b> {reason}"
+                AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text)
+                AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text)
             AdminTelegramNotifier.send(f"❌ Bonus ariza #{claim_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
             return
 
