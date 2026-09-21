@@ -248,7 +248,7 @@ class TgOtpService:
         from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
         from apps.order.models import Order, OrderState
         from apps.order.repositories.order_repo import OrderRepo
-        from apps.transaction.models import UserSumma, BonusClaimStatus
+        from apps.transaction.models import BonusClaimStatus, UserSumma
         from apps.transaction.services.bonus_service import BonusService
 
         cb_id = cb.get("id")

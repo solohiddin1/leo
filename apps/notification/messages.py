@@ -67,9 +67,9 @@ class NotificationMessages:
             "EN": "❌ Order cancelled",
         },
         body={
-            "UZ": "#{order_id} sonli buyurtmangiz bekor qilindi, {total_price} so'm hisobingizga qaytarildi.",
-            "RU": "Ваш заказ №#{order_id} отменён, {total_price} сум возвращено на ваш баланс.",
-            "EN": "Your order #{order_id} was cancelled, {total_price} sum refunded to your balance.",
+            "UZ": "#{order_id} sonli buyurtmangiz bekor qilindi, {total_price} bal hisobingizga qaytarildi.",
+            "RU": "Ваш заказ №#{order_id} отменён, {total_price} баллов возвращено на ваш баланс.",
+            "EN": "Your order #{order_id} was cancelled, {total_price} points refunded to your balance.",
         },
         image={"UZ": None, "RU": None, "EN": None},
         type=NotificationType.ORDER_REJECTED,
@@ -109,11 +109,11 @@ class NotificationMessages:
         },
         body={
             "UZ": "{code} kodi muvaffaqiyatli ro'yxatdan o'tkazildi. "
-            "Tekshiruvdan so'ng hisobingizga {summa} so'm qo'shiladi.",
+            "Tekshiruvdan so'ng hisobingizga {summa} bal qo'shiladi.",
             "RU": "Код {code} успешно зарегистрирован. "
-            "После проверки на баланс будет начислено {summa} сум.",
+            "После проверки на баланс будет начислено {summa} баллов.",
             "EN": "Code {code} was registered successfully. "
-            "{summa} will be credited to your balance after review.",
+            "{summa} points will be credited to your balance after review.",
         },
         image={"UZ": None, "RU": None, "EN": None},
         type=NotificationType.BONUS_CODE_REGISTERED,
@@ -126,9 +126,9 @@ class NotificationMessages:
             "EN": "🎁 Bonus approved",
         },
         body={
-            "UZ": "Bonus kodingiz tasdiqlandi va hisobingizga {summa} so'm qo'shildi.",
-            "RU": "Ваш бонусный код подтверждён, на ваш баланс начислено {summa} сум.",
-            "EN": "Your bonus code was approved and {summa} was credited to your balance.",
+            "UZ": "Bonus kodingiz tasdiqlandi va hisobingizga {summa} bal qo'shildi.",
+            "RU": "Ваш бонусный код подтверждён, на ваш баланс начислено {summa} баллов.",
+            "EN": "Your bonus code was approved and {summa} points were credited to your balance.",
         },
         image={"UZ": None, "RU": None, "EN": None},
         type=NotificationType.BONUS_CLAIM_APPROVED,
@@ -157,11 +157,11 @@ class NotificationMessages:
         },
         body={
             "UZ": "Siz '{challenge_title}' challenge'ini muvaffaqiyatli yakunladingiz! "
-            "Hisobingizga {reward} so'm qo'shildi.",
+            "Hisobingizga {reward} bal qo'shildi.",
             "RU": "Вы успешно завершили челлендж «{challenge_title}»! "
-            "На ваш баланс начислено {reward} сум.",
+            "На ваш баланс начислено {reward} баллов.",
             "EN": "You successfully completed the '{challenge_title}' challenge! "
-            "{reward} was credited to your balance.",
+            "{reward} points were credited to your balance.",
         },
         image={"UZ": None, "RU": None, "EN": None},
         type=NotificationType.CHALLENGE_COMPLETED,
