@@ -220,6 +220,7 @@ class TgOtpService:
     def handle_update(cls, update):
         if "callback_query" in update:
             cls._handle_callback_query(update["callback_query"])
+            logger.info(update["callback_query"])
             return
 
         message = update.get("message") or {}
