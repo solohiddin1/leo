@@ -12,6 +12,7 @@ class StoreSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
+            "shop_id",
             "address",
             "region",
             "phone_number",

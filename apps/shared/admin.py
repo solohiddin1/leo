@@ -20,7 +20,9 @@ class RegionAdmin(admin.ModelAdmin):
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "region", "phone_number", "address", "lat", "long")
+    list_display = ("id", "shop_id", "name", "region", "phone_number", "address", "lat", "long")
+    list_editable = ("shop_id",)
+    search_fields = ("name", "shop_id", "address")
     list_filter = ("region",)
 
 

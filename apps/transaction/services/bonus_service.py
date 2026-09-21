@@ -4,13 +4,13 @@ from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework.request import Request
 
+from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
 from apps.shared.repositories.store_repo import StoreRepo
 from apps.shared.utils.result_codes import ResultCodes
 from apps.shared.utils.utils import error_response, success_response
 from apps.transaction.models import BonusClaimStatus, BonusCode
 from apps.transaction.repositories.bonus_repo import BonusRepo
 from apps.transaction.repositories.challenge_repo import ChallengeRepo
-from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
 from apps.user.models import User
 
 
@@ -92,6 +92,45 @@ class BonusService:
             })
 
     @staticmethod
+    def redeem_bonus_external(user: User, raw_code: str):
+        """Redeem a code on behalf of a channel with no photo/store step (the usta-source
+        Telegram bot). Unlike `redeem_bonus`, the claim is auto-approved and `balance` is
+        credited immediately — mirrors how migrated legacy usta-source redemptions are
+        treated (see apps/shared/management/commands/migrate_from_usta.py)."""
+        raw_code = raw_code.strip().upper()
+
+        with transaction.atomic():
+            bonus_code = BonusRepo.lock_by_code(raw_code)
+
+            if not bonus_code:
+                return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
+
+            if bonus_code.is_used:
+                return error_response(ResultCodes.BONUS_CODE_ALREADY_USED)
+
+            bonus = bonus_code.bonus
+            if not bonus:
+                return error_response(ResultCodes.BONUS_CODE_INVALID)
+
+            user_summa = BonusRepo.create_claim(user, bonus, bonus_code, store=None)
+            BonusRepo.mark_used(bonus_code)
+            BonusRepo.approve(user_summa, admin_user=None, now=timezone.now())
+
+            user.balance += user_summa.summa
+            user.save(update_fields=['balance'])
+
+            BonusService._clear_user_balance_cache(user.id)
+
+            transaction.on_commit(
+                lambda: BonusService._notify_bonus_code_registered(user, bonus_code, user_summa.summa)
+            )
+
+            return success_response({
+                'balance': user.balance,
+                'awarded': user_summa.summa,
+            })
+
+    @staticmethod
     def _notify_bonus_code_registered(user: User, bonus_code: BonusCode, awarded_summa: int) -> None:
         from apps.notification.messages import NotificationMessages
         from apps.notification.services.notification_service import NotificationService
@@ -114,6 +153,8 @@ class BonusService:
 
     @staticmethod
     def approve_claim(claim_id: int, admin_user: User):
+        from apps.notification.messages import NotificationMessages
+        from apps.notification.services.notification_service import NotificationService
         from apps.transaction.services.challenge_service import ChallengeService
 
         with transaction.atomic():
@@ -131,10 +172,27 @@ class BonusService:
 
             BonusService._clear_user_balance_cache(user.id)
 
+            title, body = NotificationMessages.bonus_approved_msg.render(user.lang, summa=claim.summa)
+            NotificationService.send_to_user(
+                user=user,
+                title=title,
+                body=body,
+                notification_type="BONUS",
+                data={
+                    "type": NotificationMessages.bonus_approved_msg.type.value,
+                    "claim_id": claim.id,
+                    "awarded": claim.summa,
+                    "status": BonusClaimStatus.APPROVED,
+                },
+            )
+
             return success_response({'status': 'approved'})
 
     @staticmethod
     def reject_claim(claim_id: int, admin_user: User, reason: str):
+        from apps.notification.messages import NotificationMessages
+        from apps.notification.services.notification_service import NotificationService
+
         with transaction.atomic():
             claim = BonusRepo.get_pending_claim(claim_id)
             if not claim:
@@ -144,6 +202,20 @@ class BonusService:
             BonusRepo.reject(claim, admin_user, reason, timezone.now())
 
             BonusService._clear_user_balance_cache(user.id)
+
+            title, body = NotificationMessages.bonus_rejected_msg.render(user.lang, reason=reason or "")
+            NotificationService.send_to_user(
+                user=user,
+                title=title,
+                body=body,
+                notification_type="BONUS",
+                data={
+                    "type": NotificationMessages.bonus_rejected_msg.type.value,
+                    "claim_id": claim.id,
+                    "reason": reason or "",
+                    "status": BonusClaimStatus.REJECTED,
+                },
+            )
 
             return success_response({'status': 'rejected'})
 

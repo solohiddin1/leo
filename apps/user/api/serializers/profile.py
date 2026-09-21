@@ -41,3 +41,9 @@ class SetProfileSerializer(serializers.ModelSerializer):
             "region",
             "job",
         ]
+
+
+class UserLangUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["lang"]

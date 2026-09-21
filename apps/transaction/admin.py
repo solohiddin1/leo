@@ -20,7 +20,6 @@ class BonusCodeInline(admin.TabularInline):
 
 class BonusInline(admin.TabularInline):
     model = Bonus
-    extra = 1
     fields = ('summa', 'prefix', 'quantity')
     max_num = 10
     verbose_name = "Bonus"

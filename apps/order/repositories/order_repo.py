@@ -39,12 +39,7 @@ class OrderRepo:
             )
             AdminTelegramNotifier.send(admin_msg)
 
-            if user.lang == "ru":
-                title = "✅ Заказ принят"
-                body = f"Ваш заказ №#{order.id} подтверждён администратором."
-            else:
-                title = "✅ Buyurtmangiz qabul qilindi"
-                body = f"#{order.id} sonli buyurtmangiz administrator tomonidan tasdiqlandi."
+            title, body = NotificationMessages.order_approved_msg.render(user.lang, order_id=order.id)
 
             NotificationService.send_to_user(
                 user=user,
@@ -75,12 +70,9 @@ class OrderRepo:
             )
             AdminTelegramNotifier.send(admin_msg)
 
-            if user.lang == "ru":
-                title = "❌ Заказ отменён"
-                body = f"Ваш заказ №#{order.id} отменён, {order.total_price} сум возвращено на ваш баланс."
-            else:
-                title = "❌ Buyurtmangiz bekor qilindi"
-                body = f"#{order.id} sonli buyurtmangiz bekor qilindi, {order.total_price} so'm hisobingizga qaytarildi."
+            title, body = NotificationMessages.order_rejected_msg.render(
+                user.lang, order_id=order.id, total_price=order.total_price
+            )
 
             NotificationService.send_to_user(
                 user=user,
@@ -108,12 +100,7 @@ class OrderRepo:
         )
         AdminTelegramNotifier.send(admin_msg)
 
-        if user.lang == "ru":
-            title = "🎉 Заказ завершён"
-            body = f"Ваш заказ №#{order.id} успешно завершён."
-        else:
-            title = "🎉 Buyurtma yakunlandi"
-            body = f"#{order.id} sonli buyurtmangiz muvaffaqiyatli yakunlandi."
+        title, body = NotificationMessages.order_completed_msg.render(user.lang, order_id=order.id)
 
         NotificationService.send_to_user(
             user=user,

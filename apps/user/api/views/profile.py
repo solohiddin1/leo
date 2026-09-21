@@ -3,7 +3,11 @@ from rest_framework.generics import GenericAPIView
 from apps.shared.permission.client import ClientPermission
 from apps.shared.security import GeneralThrottle
 from apps.shared.utils.utils import success_response
-from apps.user.api.serializers.profile import ProfileSerializer, SetProfileSerializer
+from apps.user.api.serializers.profile import (
+    ProfileSerializer,
+    SetProfileSerializer,
+    UserLangUpdateSerializer,
+)
 
 
 class ProfileAPIView(GenericAPIView):
@@ -19,6 +23,19 @@ class ProfileAPIView(GenericAPIView):
 class ProfileUpdateAPIView(GenericAPIView):
     permission_classes = [ClientPermission]
     serializer_class = SetProfileSerializer
+    throttle_classes = [GeneralThrottle]
+
+    def patch(self, request, *args, **kwargs):
+        instance = request.user
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return success_response(serializer.data)
+
+
+class UserLangUpdateAPIView(GenericAPIView):
+    permission_classes = [ClientPermission]
+    serializer_class = UserLangUpdateSerializer
     throttle_classes = [GeneralThrottle]
 
     def patch(self, request, *args, **kwargs):

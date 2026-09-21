@@ -25,7 +25,7 @@ def generate_bonus_codes(sender, instance: Bonus, created, **kwargs):
     )
 
     new_codes = []
-    serial = 1
+    serial = 0
 
     while len(new_codes) < instance.quantity:
         letter = chr(ord('A') + (serial % 26))

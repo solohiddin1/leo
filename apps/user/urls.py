@@ -6,7 +6,11 @@ from apps.user.api.views.device_delete import DeviceDeleteView
 from apps.user.api.views.job import JobsAPIView
 from apps.user.api.views.login import LoginAPIView
 from apps.user.api.views.logout import LogoutAPIView
-from apps.user.api.views.profile import ProfileAPIView, ProfileUpdateAPIView
+from apps.user.api.views.profile import (
+    ProfileAPIView,
+    ProfileUpdateAPIView,
+    UserLangUpdateAPIView,
+)
 from apps.user.api.views.register import RegisterAPIView
 from apps.user.api.views.set_password import SetPasswordAPIView
 from apps.user.api.views.store import UserRedeemedStoreListView
@@ -28,10 +32,10 @@ urlpatterns = [
     path("logout/", LogoutAPIView.as_view(), name="logout"),
     path("set_password/", SetPasswordAPIView.as_view(), name="set_password"),
     path("profile/", ProfileAPIView.as_view(), name="profile"),
-    path("update_profile/", ProfileUpdateAPIView.as_view(), name="profile"),
+    path("update_profile/", ProfileUpdateAPIView.as_view(), name="profile_update"),
+    path("update_lang/", UserLangUpdateAPIView.as_view(), name="update_lang"),
     path("jobs/", JobsAPIView.as_view(), name="jobs"),
     path("redeemed-stores/", UserRedeemedStoreListView.as_view(), name="redeemed_stores"),
     path("devices/add/", DeviceAddView.as_view(), name="device_add"),
-    path("devices/<int:device_id>/delete/", DeviceDeleteView.as_view(), name="device_delete",
-    ),
+    path("devices/<int:device_id>/delete/", DeviceDeleteView.as_view(), name="device_delete"),
 ]

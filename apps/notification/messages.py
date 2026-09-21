@@ -7,6 +7,11 @@ class NotificationType(IntEnum):
     ORDER_CANCELED_BY_CLIENT = 2
     BONUS_CODE_REGISTERED = 3
     CHALLENGE_COMPLETED = 4
+    ORDER_ACCEPTED = 5
+    ORDER_REJECTED = 6
+    ORDER_COMPLETED = 7
+    BONUS_CLAIM_APPROVED = 8
+    BONUS_CLAIM_REJECTED = 9
 
 
 @dataclass(frozen=True)
@@ -18,8 +23,10 @@ class NotificationMessage:
 
     def render(self, lang: str | None, **kwargs) -> tuple[str, str]:
         lang_key = (lang or "UZ").upper()
-        title = self.title.get(lang_key, self.title["UZ"])
-        body = self.body.get(lang_key, self.body["UZ"])
+        if lang_key not in self.title and len(lang_key) > 2:
+            lang_key = lang_key[:2]
+        title = self.title.get(lang_key, self.title.get("UZ", ""))
+        body = self.body.get(lang_key, self.body.get("UZ", ""))
         if kwargs:
             title = title.format(**kwargs)
             body = body.format(**kwargs)
@@ -36,6 +43,51 @@ class NotificationMessages:
         },
         image={"UZ": None, "RU": None, "EN": None},
         type=NotificationType.ORDER_CREATED,
+    )
+
+    order_approved_msg = NotificationMessage(
+        title={
+            "UZ": "✅ Buyurtmangiz qabul qilindi",
+            "RU": "✅ Заказ принят",
+            "EN": "✅ Order accepted",
+        },
+        body={
+            "UZ": "#{order_id} sonli buyurtmangiz administrator tomonidan tasdiqlandi.",
+            "RU": "Ваш заказ №#{order_id} подтверждён администратором.",
+            "EN": "Your order #{order_id} has been confirmed by admin.",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.ORDER_ACCEPTED,
+    )
+
+    order_rejected_msg = NotificationMessage(
+        title={
+            "UZ": "❌ Buyurtmangiz bekor qilindi",
+            "RU": "❌ Заказ отменён",
+            "EN": "❌ Order cancelled",
+        },
+        body={
+            "UZ": "#{order_id} sonli buyurtmangiz bekor qilindi, {total_price} so'm hisobingizga qaytarildi.",
+            "RU": "Ваш заказ №#{order_id} отменён, {total_price} сум возвращено на ваш баланс.",
+            "EN": "Your order #{order_id} was cancelled, {total_price} sum refunded to your balance.",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.ORDER_REJECTED,
+    )
+
+    order_completed_msg = NotificationMessage(
+        title={
+            "UZ": "🎉 Buyurtma yakunlandi",
+            "RU": "🎉 Заказ завершён",
+            "EN": "🎉 Order completed",
+        },
+        body={
+            "UZ": "#{order_id} sonli buyurtmangiz muvaffaqiyatli yakunlandi.",
+            "RU": "Ваш заказ №#{order_id} успешно завершён.",
+            "EN": "Your order #{order_id} has been completed successfully.",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.ORDER_COMPLETED,
     )
 
     order_cancel_client_msg = NotificationMessage(
@@ -59,12 +111,42 @@ class NotificationMessages:
             "UZ": "{code} kodi muvaffaqiyatli ro'yxatdan o'tkazildi. "
             "Tekshiruvdan so'ng hisobingizga {summa} so'm qo'shiladi.",
             "RU": "Код {code} успешно зарегистрирован. "
-            "После проверки на баланс будет начислено {summa}.",
+            "После проверки на баланс будет начислено {summa} сум.",
             "EN": "Code {code} was registered successfully. "
             "{summa} will be credited to your balance after review.",
         },
         image={"UZ": None, "RU": None, "EN": None},
         type=NotificationType.BONUS_CODE_REGISTERED,
+    )
+
+    bonus_approved_msg = NotificationMessage(
+        title={
+            "UZ": "🎁 Bonus tasdiqlandi",
+            "RU": "🎁 Бонус подтверждён",
+            "EN": "🎁 Bonus approved",
+        },
+        body={
+            "UZ": "Bonus kodingiz tasdiqlandi va hisobingizga {summa} so'm qo'shildi.",
+            "RU": "Ваш бонусный код подтверждён, на ваш баланс начислено {summa} сум.",
+            "EN": "Your bonus code was approved and {summa} was credited to your balance.",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.BONUS_CLAIM_APPROVED,
+    )
+
+    bonus_rejected_msg = NotificationMessage(
+        title={
+            "UZ": "❌ Bonus bekor qilindi",
+            "RU": "❌ Бонус отклонён",
+            "EN": "❌ Bonus rejected",
+        },
+        body={
+            "UZ": "Bonus kodingiz bekor qilindi. Sabab: {reason}",
+            "RU": "Ваш бонусный код отклонён. Причина: {reason}",
+            "EN": "Your bonus code was rejected. Reason: {reason}",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.BONUS_CLAIM_REJECTED,
     )
 
     challenge_completed_msg = NotificationMessage(
@@ -77,7 +159,7 @@ class NotificationMessages:
             "UZ": "Siz '{challenge_title}' challenge'ini muvaffaqiyatli yakunladingiz! "
             "Hisobingizga {reward} so'm qo'shildi.",
             "RU": "Вы успешно завершили челлендж «{challenge_title}»! "
-            "На ваш баланс начислено {reward}.",
+            "На ваш баланс начислено {reward} сум.",
             "EN": "You successfully completed the '{challenge_title}' challenge! "
             "{reward} was credited to your balance.",
         },

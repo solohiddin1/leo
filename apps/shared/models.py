@@ -19,6 +19,7 @@ class Region(models.Model):
 
 class Store(BaseModel):
     name = models.CharField(max_length=255)
+    shop_id = models.IntegerField(unique=True, null=True)
     address = models.CharField(max_length=500, blank=True)
     region = models.ForeignKey(
         Region, on_delete=models.SET_NULL, null=True, blank=True, related_name="filials"
