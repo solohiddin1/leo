@@ -26,7 +26,7 @@ jobs:
             git pull origin test
             export UV_PROJECT_ENVIRONMENT=/var/www/leo/venv
             export UV_PYTHON_DOWNLOADS=never
-            "$HOME/.local/bin/uv" sync --locked --no-dev
+            uv sync --locked --no-dev
             python manage.py makemigrations
             python manage.py migrate --noinput
             python manage.py collectstatic --noinput
