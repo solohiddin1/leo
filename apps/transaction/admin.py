@@ -4,7 +4,7 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.shortcuts import render
 
 from apps.shared.utils.preview import image_preview_with_no_compressed
-from apps.transaction.models import Bonus, BonusCode, UserSumma, UserSummaImage, Challenge
+from apps.transaction.models import Bonus, BonusCode, Challenge, UserSumma, UserSummaImage
 from apps.transaction.services.bonus_service import BonusService
 
 
