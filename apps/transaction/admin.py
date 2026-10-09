@@ -14,7 +14,6 @@ class RejectClaimForm(forms.Form):
 
 class BonusCodeInline(admin.TabularInline):
     model = BonusCode
-    extra = 1
     fields = ('code', 'is_used')
 
 

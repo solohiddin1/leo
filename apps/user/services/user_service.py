@@ -15,10 +15,15 @@ class UserService:
     def register(data: dict) -> User:
         # device_id = data.pop("device_id")
         user = UserRepo.get_user_by_username(data["username"])
+        is_new = False
         if user is None:
             user = User.objects.create_user(**data)
+            is_new = True
         user.save()
         CartRepo.get_or_create_cart(user)
+        if is_new:
+            from apps.transaction.services.bonus_service import BonusService
+            BonusService.award_signup_bonus(user)
         otp = SmsService.generate_otp()
 
         return success_response({"username": user.username, "otp": otp})

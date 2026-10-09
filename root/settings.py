@@ -15,6 +15,7 @@ DEBUG = "True"
 ALLOWED_HOSTS = ["*"]
 
 BASE = [
+    "apps.shared",
     "jazzmin",
     "modeltranslation",
     # "django.contrib.admin",
@@ -34,11 +35,11 @@ LIBS = [
 
 APPS = [
     "apps.user",
-    "apps.shared",
     "apps.product",
     "apps.order",
     "apps.transaction",
     "apps.notification",
+    "apps.integrations",
 ]
 
 INSTALLED_APPS = BASE + LIBS + APPS
@@ -221,5 +222,7 @@ TELEGRAM_ADMIN_CHAT_ID = getenv("TELEGRAM_ADMIN_CHAT_ID")
 FIREBASE_CREDENTIALS_FILE = getenv(
     "FIREBASE_CREDENTIALS_FILE", str("firebase/leo-usta-firebase-adminsdk-fbsvc-41b6970f3f.json")
 )
+
+INTERNAL_API_TOKEN = getenv("INTERNAL_API_TOKEN")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

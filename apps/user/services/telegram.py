@@ -426,5 +426,7 @@ class TgOtpService:
                 first_name=frm.get("first_name") or "",
                 last_name=frm.get("last_name") or "",
             )
+            from apps.transaction.services.bonus_service import BonusService
+            BonusService.award_signup_bonus(user)
         UserRepo.attach_telegram(user, telegram_id, frm.get("username"))
         return user

@@ -12,6 +12,9 @@ class NotificationType(IntEnum):
     ORDER_COMPLETED = 7
     BONUS_CLAIM_APPROVED = 8
     BONUS_CLAIM_REJECTED = 9
+    SIGNUP_BONUS = 10
+    POINTS_EXPIRING_WARNING = 11
+    POINTS_EXPIRED = 12
 
 
 @dataclass(frozen=True)
@@ -165,4 +168,49 @@ class NotificationMessages:
         },
         image={"UZ": None, "RU": None, "EN": None},
         type=NotificationType.CHALLENGE_COMPLETED,
+    )
+
+    signup_bonus_msg = NotificationMessage(
+        title={
+            "UZ": "🎉 Xush kelibsiz!",
+            "RU": "🎉 Добро пожаловать!",
+            "EN": "🎉 Welcome!",
+        },
+        body={
+            "UZ": "Ro'yxatdan o'tganingiz uchun hisobingizga {summa} so'm bonus berildi!",
+            "RU": "Вам начислено {summa} сум бонуса за регистрацию!",
+            "EN": "{summa} bonus was credited to your balance for signing up!",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.SIGNUP_BONUS,
+    )
+
+    points_expiring_warning_msg = NotificationMessage(
+        title={
+            "UZ": "⏳ Bonus muddati tugamoqda",
+            "RU": "⏳ Срок действия баллов истекает",
+            "EN": "⏳ Points expiring soon",
+        },
+        body={
+            "UZ": "Sizning {summa} balingiz 7 kundan so'ng muddati tugaydi. Ularni sarflashga ulguring!",
+            "RU": "Срок действия ваших {summa} баллов истекает через 7 дней. Успейте использовать!",
+            "EN": "Your {summa} points will expire in 7 days. Be sure to use them!",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.POINTS_EXPIRING_WARNING,
+    )
+
+    points_expired_msg = NotificationMessage(
+        title={
+            "UZ": "⌛ Bonus muddati o'tdi",
+            "RU": "⌛ Срок действия баллов истёк",
+            "EN": "⌛ Points expired",
+        },
+        body={
+            "UZ": "Amal qilish muddati (1 yil) tugaganligi sababli {summa} bal hisobingizdan chiqarildi.",
+            "RU": "В связи с истечением срока действия (1 год) {summa} баллов списано с вашего баланса.",
+            "EN": "{summa} points have been deducted due to expiration (1 year limit reached).",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.POINTS_EXPIRED,
     )

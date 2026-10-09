@@ -9,11 +9,16 @@ class OrderProblemImageInline(admin.TabularInline):
     extra = 0
 
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "total_price", "store", "state", "is_completed")
     list_filter = ("state", "is_completed")
-    inlines = [OrderProblemImageInline]
+    inlines = [OrderItemInline, OrderProblemImageInline]
     actions = ["approve_order", "reject_order"]
 
     @admin.action(description="Tanlanganni tasdiqlash")
