@@ -296,6 +296,19 @@ class BonusService:
                 ]
             }
 
+        # Send user-uploaded bonus redemption images if available
+        claim = None
+        if claim_id:
+            claim = UserSumma.objects.filter(id=claim_id).prefetch_related("images").first()
+        elif hasattr(code, "redemption") and code.redemption:
+            claim = code.redemption
+
+        if claim:
+            for idx, img_obj in enumerate(claim.images.all(), start=1):
+                if img_obj.image:
+                    img_caption = f"📷 Bonus #{claim.id} rasm {idx} ({code.code})"
+                    AdminTelegramNotifier.send_photo(img_obj.image, caption=img_caption)
+
         AdminTelegramNotifier.send(msg, reply_markup=reply_markup)
 
     @staticmethod

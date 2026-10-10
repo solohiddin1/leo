@@ -362,12 +362,6 @@ class Command(BaseCommand):
     # -- bonus codes --------------------------------------------------------
 
     def _migrate_bonuses(self, bonus_rows, user_summa_rows, product_map):
-        used_bonus_pks = {
-            row["fields"]["bonus"]
-            for row in user_summa_rows
-            if row["fields"].get("bonus") is not None
-        }
-
         bonus_map = {}
         bonus_code_map = {}
         for row in bonus_rows:
@@ -385,42 +379,24 @@ class Command(BaseCommand):
                 continue
 
             bonus = Bonus.objects.create(
-                product_id=product_id, summa=fields["summa"], prefix=fields["code"], quantity=1
+                product_id=product_id,
+                summa=fields["summa"],
+                prefix=fields["code"],
+                quantity=10000,
             )
-            bonus_code = BonusCode.objects.create(
-                bonus=bonus,
-                code=fields["code"],
-                is_used=row["pk"] in used_bonus_pks,
-            )
+            bonus_code = BonusCode.objects.filter(bonus=bonus, code=fields["code"]).first()
             bonus_map[row["pk"]] = bonus.id
-            bonus_code_map[row["pk"]] = bonus_code.id
+            if bonus_code:
+                bonus_code_map[row["pk"]] = bonus_code.id
             self._count("bonus_codes.created")
         return bonus_map, bonus_code_map
 
     def _migrate_user_summas(self, user_summa_rows, user_map, bonus_map, bonus_code_map):
-        # usta's UserSumma.code is the raw code the user typed, which only equals a
-        # Bonus.code when `bonus` resolved at redemption time. Pre-0003 rows can have
-        # `bonus=None` with an unjoinable raw code (see CLAUDE.md) — those get a bare
-        # placeholder BonusCode so leo's non-nullable OneToOne can still be satisfied,
-        # since they always carry summa=0 (already grandfathered as expired).
-        #
-        # usta-source's own redeem view has no locking, so a handful of codes really
-        # were double-redeemed in production (two UserSumma rows, same Bonus). leo's
-        # UserSumma.code is a strict OneToOne, so only one claim per code can keep the
-        # real BonusCode — deterministically, the earliest by created_at (falling back
-        # to usta's own pk to break exact ties, so the choice is stable across reruns).
-        # Every other claim (including every placeholder) is keyed off its own usta pk,
-        # which is stable and unique in the source data — so the whole step is safe to
-        # rerun: get_or_create just matches what a previous run already created instead
-        # of colliding with it.
         rows_sorted = sorted(
             user_summa_rows, key=lambda r: (r["fields"].get("created_at") or "", r["pk"])
         )
-        winner_pk_by_bonus = {}
-        for row in rows_sorted:
-            usta_bonus_pk = row["fields"].get("bonus")
-            if usta_bonus_pk is not None and usta_bonus_pk not in winner_pk_by_bonus:
-                winner_pk_by_bonus[usta_bonus_pk] = row["pk"]
+
+        used_code_ids = set()
 
         for row in rows_sorted:
             fields = row["fields"]
@@ -429,30 +405,75 @@ class Command(BaseCommand):
                 self._count("user_summas.skipped_no_user")
                 continue
 
+            raw_code = fields["code"]
             usta_bonus_pk = fields.get("bonus")
-            is_winner = (
-                usta_bonus_pk is not None
-                and usta_bonus_pk in bonus_code_map
-                and winner_pk_by_bonus.get(usta_bonus_pk) == row["pk"]
+            bonus_id = bonus_map.get(usta_bonus_pk) if usta_bonus_pk else None
+            product_id = (
+                Bonus.objects.filter(pk=bonus_id).values_list("product_id", flat=True).first()
+                if bonus_id
+                else None
             )
-            if is_winner:
-                bonus_id = bonus_map[usta_bonus_pk]
-                bonus_code_id = bonus_code_map[usta_bonus_pk]
-                product_id = Bonus.objects.get(pk=bonus_id).product_id
-            else:
-                placeholder_code = f"{fields['code']}#usta{row['pk']}"
-                placeholder, _ = BonusCode.objects.get_or_create(
-                    code=placeholder_code, defaults={"bonus": None, "is_used": True}
+
+            # Check if there is an existing legacy #usta placeholder from a previous migration run
+            old_placeholder_code = f"{raw_code}#usta{row['pk']}"
+            old_placeholder = BonusCode.objects.filter(code=old_placeholder_code).first()
+
+            # Find or get the real BonusCode
+            bonus_code = BonusCode.objects.filter(code=raw_code).first()
+
+            if not bonus_code:
+                # If the code was not in the generated batch, create it with its real bonus
+                bonus_obj = Bonus.objects.filter(pk=bonus_id).first() if bonus_id else None
+                bonus_code, _ = BonusCode.objects.get_or_create(
+                    code=raw_code,
+                    defaults={"bonus": bonus_obj, "is_used": True},
                 )
-                bonus_id = None
-                bonus_code_id = placeholder.id
-                product_id = None
+            elif bonus_id and not bonus_code.bonus_id:
+                bonus_code.bonus_id = bonus_id
+                bonus_code.save(update_fields=["bonus_id"])
+
+            if not product_id and bonus_code.bonus and bonus_code.bonus.product_id:
+                product_id = bonus_code.bonus.product_id
+
+            # Ensure is_used is set
+            if not bonus_code.is_used:
+                bonus_code.is_used = True
+                bonus_code.save(update_fields=["is_used"])
+
+            # Handle duplicate usage (rare cases like AVP4A0000 where the same code was used multiple times)
+            if bonus_code.id in used_code_ids or (
+                UserSumma.objects.filter(code_id=bonus_code.id)
+                .exclude(user_id=user_id, summa=fields["summa"])
+                .exists()
+            ):
+                duplicate_code = f"{raw_code}#dup{row['pk']}"
+                target_code, _ = BonusCode.objects.get_or_create(
+                    code=duplicate_code,
+                    defaults={"bonus": bonus_code.bonus, "is_used": True},
+                )
+            else:
+                target_code = bonus_code
+                used_code_ids.add(bonus_code.id)
+
+            # If an old #usta placeholder exists, migrate the existing UserSumma record to target_code
+            if old_placeholder:
+                existing_claim = UserSumma.objects.filter(code_id=old_placeholder.id).first()
+                if existing_claim:
+                    existing_claim.code = target_code
+                    if bonus_id:
+                        existing_claim.bonus_id = bonus_id
+                    if product_id:
+                        existing_claim.product_id = product_id
+                    existing_claim.save(update_fields=["code", "bonus", "product"])
+                    old_placeholder.delete()
+                    self._count("user_summas.matched")
+                    continue
 
             user_summa, created = UserSumma.objects.get_or_create(
-                code_id=bonus_code_id,
+                code_id=target_code.id,
                 defaults=dict(
                     user_id=user_id,
-                    bonus_id=bonus_id,
+                    bonus_id=bonus_id or target_code.bonus_id,
                     store=None,
                     product_id=product_id,
                     summa=fields["summa"],
@@ -464,6 +485,15 @@ class Command(BaseCommand):
                 _force_created_at(user_summa, fields.get("created_at"))
                 self._count("user_summas.created")
             else:
+                update_fields = []
+                if (bonus_id or target_code.bonus_id) and not user_summa.bonus_id:
+                    user_summa.bonus_id = bonus_id or target_code.bonus_id
+                    update_fields.append("bonus")
+                if product_id and not user_summa.product_id:
+                    user_summa.product_id = product_id
+                    update_fields.append("product")
+                if update_fields:
+                    user_summa.save(update_fields=update_fields)
                 self._count("user_summas.matched")
 
     # -- orders / cart --------------------------------------------------------
