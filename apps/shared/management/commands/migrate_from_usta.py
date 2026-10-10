@@ -63,10 +63,25 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        from django.db.models.signals import post_save
+        from apps.product.models import Category, Image, SubCategory
+        from apps.product.signals import (
+            compress_category_image_after_save,
+            compress_product_image_after_save,
+            compress_subcategory_image_after_save,
+        )
+        from apps.transaction.models import Bonus
+        from apps.transaction.signals import generate_bonus_codes
+
         with open(options["dump_path"], encoding="utf-8") as f:
             rows = json.load(f)
         by_model = _index_by_model(rows)
         self.counts = {}
+
+        post_save.disconnect(generate_bonus_codes, sender=Bonus)
+        post_save.disconnect(compress_product_image_after_save, sender=Image)
+        post_save.disconnect(compress_category_image_after_save, sender=Category)
+        post_save.disconnect(compress_subcategory_image_after_save, sender=SubCategory)
 
         try:
             with transaction.atomic():
@@ -119,6 +134,11 @@ class Command(BaseCommand):
                     raise _DryRunRollback
         except _DryRunRollback:
             pass
+        finally:
+            post_save.connect(generate_bonus_codes, sender=Bonus)
+            post_save.connect(compress_product_image_after_save, sender=Image)
+            post_save.connect(compress_category_image_after_save, sender=Category)
+            post_save.connect(compress_subcategory_image_after_save, sender=SubCategory)
 
     def _count(self, key, n=1):
         self.counts[key] = self.counts.get(key, 0) + n
