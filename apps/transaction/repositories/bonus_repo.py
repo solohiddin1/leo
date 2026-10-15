@@ -8,11 +8,11 @@ from apps.user.models import User
 class BonusRepo:
     @staticmethod
     def get_by_code(code: str) -> BonusCode | None:
-        return BonusCode.objects.select_related('bonus').filter(code=code).first()
+        return BonusCode.objects.select_related('bonus').filter(code=code.strip().upper()).first()
 
     @staticmethod
     def lock_by_code(code: str) -> BonusCode | None:
-        return BonusCode.objects.select_related('bonus').select_for_update().filter(code=code).first()
+        return BonusCode.objects.select_related('bonus').select_for_update().filter(code=code.strip().upper()).first()
 
     @staticmethod
     def mark_used(bonus_code: BonusCode) -> None:

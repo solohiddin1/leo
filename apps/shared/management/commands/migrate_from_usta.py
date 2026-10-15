@@ -9,6 +9,7 @@ from apps.order.repositories.cart_repo import CartRepo
 from apps.product.models import Category, Image, Product, SubCategory
 from apps.shared.models import Region, Store
 from apps.transaction.models import Bonus, BonusClaimStatus, BonusCode, UserSumma
+from apps.transaction.signals import generate_bonus_codes
 from apps.user.models import User
 
 # usta-source's user.Region.pk -> leo's shared.Region.soato_id, matched by hand against
@@ -78,7 +79,6 @@ class Command(BaseCommand):
         by_model = _index_by_model(rows)
         self.counts = {}
 
-        post_save.disconnect(generate_bonus_codes, sender=Bonus)
         post_save.disconnect(compress_product_image_after_save, sender=Image)
         post_save.disconnect(compress_category_image_after_save, sender=Category)
         post_save.disconnect(compress_subcategory_image_after_save, sender=SubCategory)
@@ -135,7 +135,6 @@ class Command(BaseCommand):
         except _DryRunRollback:
             pass
         finally:
-            post_save.connect(generate_bonus_codes, sender=Bonus)
             post_save.connect(compress_product_image_after_save, sender=Image)
             post_save.connect(compress_category_image_after_save, sender=Category)
             post_save.connect(compress_subcategory_image_after_save, sender=SubCategory)
@@ -387,27 +386,54 @@ class Command(BaseCommand):
         for row in bonus_rows:
             fields = row["fields"]
             product_id = product_map.get(fields["product"])
+            code_str = fields["code"]
+            is_active = (fields.get("summa") or 0) > 0
 
-            existing_code = BonusCode.objects.filter(code=fields["code"]).first()
-            if existing_code:
-                bonus_map[row["pk"]] = existing_code.bonus_id
-                bonus_code_map[row["pk"]] = existing_code.id
-                if existing_code.bonus and not existing_code.bonus.prefix:
-                    existing_code.bonus.prefix = fields["code"]
-                    existing_code.bonus.save(update_fields=["prefix"])
+            existing_code = BonusCode.objects.filter(code=code_str).first()
+            existing_bonus = existing_code.bonus if existing_code else None
+            if not existing_bonus and product_id:
+                existing_bonus = Bonus.objects.filter(product_id=product_id, prefix=code_str).first()
+
+            if existing_bonus:
+                bonus_map[row["pk"]] = existing_bonus.id
+                update_fields = []
+                if not existing_bonus.prefix:
+                    existing_bonus.prefix = code_str
+                    update_fields.append("prefix")
+                if not is_active and existing_bonus.is_active:
+                    existing_bonus.is_active = False
+                    update_fields.append("is_active")
+                if update_fields:
+                    existing_bonus.save(update_fields=update_fields)
+
+                if existing_code:
+                    bonus_code_map[row["pk"]] = existing_code.id
+                else:
+                    bonus_code, _ = BonusCode.objects.get_or_create(
+                        code=code_str,
+                        defaults={"bonus": existing_bonus}
+                    )
+                    bonus_code_map[row["pk"]] = bonus_code.id
+                if existing_bonus.codes.count() < 100:
+                    generate_bonus_codes(Bonus, existing_bonus, created=True)
                 self._count("bonus_codes.matched")
                 continue
 
             bonus = Bonus.objects.create(
                 product_id=product_id,
                 summa=fields["summa"],
-                prefix=fields["code"],
+                prefix=code_str,
                 quantity=10000,
+                is_active=is_active,
             )
-            bonus_code = BonusCode.objects.filter(bonus=bonus, code=fields["code"]).first()
             bonus_map[row["pk"]] = bonus.id
-            if bonus_code:
-                bonus_code_map[row["pk"]] = bonus_code.id
+            bonus_code = BonusCode.objects.filter(bonus=bonus, code=code_str).first()
+            if not bonus_code:
+                bonus_code, _ = BonusCode.objects.get_or_create(
+                    code=code_str,
+                    defaults={"bonus": bonus}
+                )
+            bonus_code_map[row["pk"]] = bonus_code.id
             self._count("bonus_codes.created")
         return bonus_map, bonus_code_map
 
@@ -479,12 +505,14 @@ class Command(BaseCommand):
             if old_placeholder:
                 existing_claim = UserSumma.objects.filter(code_id=old_placeholder.id).first()
                 if existing_claim:
-                    existing_claim.code = target_code
-                    if bonus_id:
-                        existing_claim.bonus_id = bonus_id
-                    if product_id:
-                        existing_claim.product_id = product_id
-                    existing_claim.save(update_fields=["code", "bonus", "product"])
+                    already_claimed = UserSumma.objects.filter(code_id=target_code.id).first()
+                    if not already_claimed:
+                        existing_claim.code = target_code
+                        if bonus_id:
+                            existing_claim.bonus_id = bonus_id
+                        if product_id:
+                            existing_claim.product_id = product_id
+                        existing_claim.save(update_fields=["code", "bonus", "product"])
                     old_placeholder.delete()
                     self._count("user_summas.matched")
                     continue

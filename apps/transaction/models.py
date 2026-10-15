@@ -15,7 +15,8 @@ class Bonus(models.Model):
         blank=True,
         default="",
     )
-    quantity = models.PositiveIntegerField(default=9999, verbose_name="Amount of code")
+    quantity = models.PositiveIntegerField(default=10000, verbose_name="Amount of code")
+    is_active = models.BooleanField(default=True, verbose_name="Is Active")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:

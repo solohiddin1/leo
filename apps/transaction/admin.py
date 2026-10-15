@@ -19,7 +19,7 @@ class BonusCodeInline(admin.TabularInline):
 
 class BonusInline(admin.TabularInline):
     model = Bonus
-    fields = ('summa', 'prefix', 'quantity')
+    fields = ('summa', 'prefix', 'quantity', 'is_active')
     max_num = 10
     verbose_name = "Bonus"
     verbose_name_plural = "Bonuses"
@@ -30,13 +30,18 @@ class BonusInline(admin.TabularInline):
 
 @admin.register(Bonus)
 class BonusAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'summa', 'prefix', 'quantity', 'code_count')
+    list_display = ('id', 'product', 'summa', 'prefix', 'quantity', 'is_active', 'code_count')
+    list_filter = ('is_active',)
+    list_editable = ('is_active',)
     list_select_related = ('product',)
     # inlines = [BonusCodeInline]
 
     def code_count(self, obj):
-        return obj.codes.count()
-    code_count.short_description = 'Generated'
+        used = obj.codes.filter(is_used=True).count()
+        total = obj.codes.count()
+        return f"{used} / {total} (sig'im: {obj.quantity})"
+
+    code_count.short_description = "Ishlatilgan / Baza (Sig'im)"
 
 
 @admin.register(BonusCode)

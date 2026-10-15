@@ -41,6 +41,8 @@ class BonusService:
             return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
         if bonus_code.is_used:
             return error_response(ResultCodes.BONUS_CODE_ALREADY_USED)
+        if not bonus_code.bonus or not bonus_code.bonus.is_active:
+            return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
 
         return success_response({'summa': bonus_code.bonus.summa})
 
@@ -64,8 +66,8 @@ class BonusService:
                 return error_response(ResultCodes.BONUS_CODE_ALREADY_USED)
 
             bonus = bonus_code.bonus
-            if not bonus:
-                return error_response(ResultCodes.BONUS_CODE_INVALID)
+            if not bonus or not bonus.is_active:
+                return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
 
             store = None
             if store_id:
@@ -111,8 +113,8 @@ class BonusService:
                 return error_response(ResultCodes.BONUS_CODE_ALREADY_USED)
 
             bonus = bonus_code.bonus
-            if not bonus:
-                return error_response(ResultCodes.BONUS_CODE_INVALID)
+            if not bonus or not bonus.is_active:
+                return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
 
             user_summa = BonusRepo.create_claim(user, bonus, bonus_code, store=None)
             BonusRepo.mark_used(bonus_code)
