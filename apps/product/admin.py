@@ -32,6 +32,7 @@ class ProductImageInline(StackedAdmin):
 class CategoryAdmin(CustomAdmin):
     inlines = (SubCategoryInline,)
     list_display = ("id", "name_uz", "name_ru", "order", "image_preview")
+    search_fields = ("name", "name_uz", "name_ru")
     readonly_fields = ['image_compressed', "image_preview"]
 
     image_preview = image_preview
@@ -40,6 +41,7 @@ class CategoryAdmin(CustomAdmin):
 @admin.register(SubCategory)
 class SubCategoryAdmin(TabbedTranslationAdmin):
     list_display = ("id", "name_uz", "name_ru", "category", "image_preview")
+    search_fields = ("name", "name_uz", "name_ru", "category__name", "category__name_uz", "category__name_ru")
     readonly_fields = ['image_compressed']
     image_preview = image_preview
 
@@ -48,6 +50,14 @@ class SubCategoryAdmin(TabbedTranslationAdmin):
 class ProductAdmin(TabbedTranslationAdmin):
     list_display = ("id", "name_uz", "name_ru", "price", "category",
                     "is_active", "image_preview")
+    search_fields = (
+        "name",
+        "name_uz",
+        "name_ru",
+        "category__name",
+        "category__name_uz",
+        "category__name_ru",
+    )
     list_filter = ("is_active", "category")
     inlines = [ImageInline, BonusInline]
     image_preview = image_preview_for_product

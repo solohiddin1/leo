@@ -50,7 +50,8 @@ def _compress_product_image(instance: Image) -> None:
 
 @receiver(pre_save, sender=Image)
 def track_product_image_changes(sender, instance, **kwargs):
-    print(f"Tracking changes for Image #{instance.pk}")
+    if kwargs.get('raw'):
+        return
 
     if not instance.pk:
         instance._image_changed = bool(instance.image)
@@ -70,6 +71,9 @@ def track_product_image_changes(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Image)
 def compress_product_image_after_save(sender, instance, created, **kwargs):
+    if kwargs.get('raw'):
+        return
+
     if not instance.image:
         return
 
@@ -114,6 +118,9 @@ def _compress_category_image(instance, src_field: str, dest_field: str) -> None:
 
 @receiver(pre_save, sender=Category)
 def track_category_image_changes(sender, instance, **kwargs):
+    if kwargs.get('raw'):
+        return
+
     if not instance.pk:
         instance._image_changed = bool(instance.image)
         return
@@ -131,6 +138,9 @@ def track_category_image_changes(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Category)
 def compress_category_image_after_save(sender, instance, created, **kwargs):
+    if kwargs.get('raw'):
+        return
+
     if not instance.image:
         return
 
@@ -143,6 +153,9 @@ def compress_category_image_after_save(sender, instance, created, **kwargs):
 
 @receiver(pre_save, sender=SubCategory)
 def track_subcategory_image_changes(sender, instance, **kwargs):
+    if kwargs.get('raw'):
+        return
+
     if not instance.pk:
         instance._image_changed = bool(instance.image)
         return
@@ -160,6 +173,9 @@ def track_subcategory_image_changes(sender, instance, **kwargs):
 
 @receiver(post_save, sender=SubCategory)
 def compress_subcategory_image_after_save(sender, instance, created, **kwargs):
+    if kwargs.get('raw'):
+        return
+
     if not instance.image:
         return
 

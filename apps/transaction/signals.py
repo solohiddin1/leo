@@ -10,6 +10,9 @@ _CLEAN_PREFIX_RE = re.compile(r"^(.*?)[A-Z]0+$")
 
 @receiver(post_save, sender=Bonus)
 def generate_bonus_codes(sender, instance: Bonus, created, **kwargs):
+    if kwargs.get('raw'):
+        return
+
     if not created:
         return
 
