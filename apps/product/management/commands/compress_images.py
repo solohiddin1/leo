@@ -1,6 +1,8 @@
 import logging
+
 from django.core.management.base import BaseCommand
-from apps.product.models import Category, SubCategory, Image
+
+from apps.product.models import Category, Image, SubCategory
 from apps.shared.models import Banner
 from apps.shared.utils.compress import compress_image
 
