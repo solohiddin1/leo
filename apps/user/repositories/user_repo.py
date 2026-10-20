@@ -16,8 +16,8 @@ class UserRepo:
 
     @classmethod
     def attach_telegram(cls, user, telegram_id, telegram_username):
-        user.telegram_id = telegram_id
-        user.telegram_username = telegram_username
+        user.telegram_id = str(telegram_id)
+        user.telegram_username = telegram_username or ""
         user.save(update_fields=["telegram_id", "telegram_username"])
         return user
 

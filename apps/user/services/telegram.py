@@ -204,11 +204,17 @@ class TgOtpService:
     @classmethod
     def _handle_contact(cls, chat_id, telegram_id, frm, contact):
         logger.info(f"contact : {contact}, {contact.get('phone_number')} phone number")
-        if contact.get("user_id") != telegram_id:
+        if contact.get("user_id") and contact.get("user_id") != telegram_id:
             TelegramClient.send_message(chat_id, WRONG_CONTACT_MSG)
             return
 
-        row = TelegramRepo.get_pending_token_by_telegram_id(telegram_id)
+        phone = cls._normalize_phone(contact.get("phone_number") or "")
+        cls._process_phone(chat_id, telegram_id, frm, phone)
+
+    @classmethod
+    def _process_phone(cls, chat_id, telegram_id, frm, phone, row=None):
+        if not row:
+            row = TelegramRepo.get_pending_token_by_telegram_id(telegram_id)
         logger.info(f"contact from telegram login {row}, {telegram_id}")
         if not row:
             return
@@ -218,7 +224,6 @@ class TgOtpService:
             )
             return
 
-        phone = cls._normalize_phone(contact.get("phone_number") or "")
         user = cls._link_or_create_user(phone, telegram_id, frm)
 
         if row.otp_mode:
@@ -229,7 +234,9 @@ class TgOtpService:
                 )
                 return
             TelegramRepo.set_user(row, user)
-            TelegramClient.send_message(chat_id, cls._otp_msg(result))
+            TelegramClient.send_message(
+                chat_id, cls._otp_msg(result), reply_markup=REMOVE_KEYBOARD
+            )
         else:
             user.is_verified = True
             user.save(update_fields=["is_verified"])
@@ -247,8 +254,8 @@ class TgOtpService:
 
         message = update.get("message") or {}
         if message.get("reply_to_message"):
-            cls._handle_reply_message(message)
-            return
+            if cls._handle_reply_message(message):
+                return
 
         frm = message.get("from") or {}
         telegram_id = frm.get("id")
@@ -262,9 +269,17 @@ class TgOtpService:
             cls._handle_contact(chat_id, telegram_id, frm, contact)
             return
 
-        text = message.get("text") or ""
+        text = (message.get("text") or "").strip()
         if text.startswith("/start"):
             cls._handle_start(chat_id, telegram_id, frm, text)
+            return
+
+        phone = cls._normalize_phone(text)
+        if len(phone) == 12 and phone.startswith("998"):
+            row = TelegramRepo.get_pending_token_by_telegram_id(telegram_id)
+            if row and cls._is_usable(row):
+                cls._process_phone(chat_id, telegram_id, frm, phone, row=row)
+                return
 
     @classmethod
     def _handle_callback_query(cls, cb):
@@ -469,7 +484,7 @@ class TgOtpService:
                     AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text)
                     AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text)
                 AdminTelegramNotifier.send(f"❌ Buyurtma #{order_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
-            return
+            return True
 
         bonus_match = re.search(r"Bonus\s+ariza\s+#(\d+)\s+bekor\s+qilish.*\(msg:(\d+)\)", parent_text)
         if not bonus_match:
@@ -486,7 +501,9 @@ class TgOtpService:
                 AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text)
                 AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text)
             AdminTelegramNotifier.send(f"❌ Bonus ariza #{claim_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
-            return
+            return True
+
+        return False
 
     @staticmethod
     def _success_msg():
