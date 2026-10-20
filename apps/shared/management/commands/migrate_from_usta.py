@@ -62,6 +62,11 @@ class Command(BaseCommand):
             action="store_true",
             help="Run the whole import inside a transaction that is rolled back at the end",
         )
+        parser.add_argument(
+            "--skip-compression",
+            action="store_true",
+            help="Skip compressing catalog images to WebP at the end of migration",
+        )
 
     def handle(self, *args, **options):
         from django.db.models.signals import post_save
@@ -138,6 +143,11 @@ class Command(BaseCommand):
             post_save.connect(compress_product_image_after_save, sender=Image)
             post_save.connect(compress_category_image_after_save, sender=Category)
             post_save.connect(compress_subcategory_image_after_save, sender=SubCategory)
+
+        if not options["dry_run"] and not options.get("skip_compression"):
+            self.stdout.write(self.style.NOTICE("\nCompressing catalog images..."))
+            from django.core.management import call_command
+            call_command("compress_images")
 
     def _count(self, key, n=1):
         self.counts[key] = self.counts.get(key, 0) + n

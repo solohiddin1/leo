@@ -12,7 +12,12 @@ class BonusRepo:
 
     @staticmethod
     def lock_by_code(code: str) -> BonusCode | None:
-        return BonusCode.objects.select_related('bonus').select_for_update().filter(code=code.strip().upper()).first()
+        return (
+            BonusCode.objects.select_related('bonus')
+            .select_for_update(of=('self',))
+            .filter(code=code.strip().upper())
+            .first()
+        )
 
     @staticmethod
     def mark_used(bonus_code: BonusCode) -> None:

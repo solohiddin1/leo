@@ -26,7 +26,7 @@ class UserLangUpdateTestCase(APITestCase):
         self.assertEqual(self.user.lang, "ru")
 
     def test_update_lang_via_lang_endpoint_post(self):
-        url = reverse("lang_update")
+        url = reverse("update_lang")
         response = self.client.post(url, {"lang": "ru"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.user.refresh_from_db()
@@ -73,7 +73,7 @@ class NotificationLanguageTestCase(APITestCase):
 
         title_ru, body_ru = NotificationMessages.order_rejected_msg.render("ru", order_id=789, total_price=50000)
         self.assertIn("Заказ отменён", title_ru)
-        self.assertIn("50000 сум возвращено", body_ru)
+        self.assertIn("50000 баллов возвращено", body_ru)
 
     def test_bonus_registered_notification_languages(self):
         title_uz, body_uz = NotificationMessages.bonus_create_msg.render("uz", code="CODE123", summa=10000)
