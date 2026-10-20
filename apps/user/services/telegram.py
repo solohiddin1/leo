@@ -78,7 +78,8 @@ class TgOtpService:
     @classmethod
     def request(cls):
         config = SiteConfig.objects.first()
-        otp_mode = config.send_otp_code if config else False
+        # otp_mode = config.send_otp_code if config else True
+        otp_mode = True
 
         token = secrets.token_urlsafe(32)
         expires_at = timezone.now() + timedelta(
