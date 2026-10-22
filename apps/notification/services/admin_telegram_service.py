@@ -91,6 +91,79 @@ class AdminTelegramNotifier:
             logger.warning(f"Failed to send photo to admin telegram chat: {exc}")
 
     @classmethod
+    def send_photo_sync(cls, photo_file, caption: str = "", reply_markup: dict = None) -> None:
+        token = cls.get_token()
+        if not token or not settings.TELEGRAM_ADMIN_CHAT_ID:
+            return
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendPhoto"
+            data = {
+                "chat_id": settings.TELEGRAM_ADMIN_CHAT_ID,
+                "caption": caption,
+                "parse_mode": "HTML",
+            }
+            if reply_markup is not None:
+                data["reply_markup"] = json_lib.dumps(reply_markup)
+
+            file_content = None
+            filename = "photo.jpg"
+
+            if hasattr(photo_file, "path"):
+                with open(photo_file.path, "rb") as f:
+                    file_content = f.read()
+                filename = photo_file.name.split("/")[-1]
+            elif isinstance(photo_file, str):
+                with open(photo_file.path, "rb") as f:
+                    file_content = f.read()
+                filename = photo_file.split("/")[-1]
+            elif hasattr(photo_file, "read"):
+                photo_file.seek(0)
+                file_content = photo_file.read()
+                if hasattr(photo_file, "name"):
+                    filename = photo_file.name
+
+            if not file_content:
+                return
+
+            files = {"photo": (filename, file_content, "image/jpeg")}
+            cls.send_photo_request(url, data=data, files=files)
+            logger.info(f"Sent photo synchronously to admin telegram chat: {caption}")
+        except Exception as exc:
+            logger.warning(f"Failed to send photo synchronously to admin telegram chat: {exc}")
+
+    @classmethod
+    def send_sync(cls, text: str, reply_markup: dict = None) -> None:
+        token = cls.get_token()
+        if not token or not settings.TELEGRAM_ADMIN_CHAT_ID:
+            return
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            payload = {
+                "chat_id": settings.TELEGRAM_ADMIN_CHAT_ID,
+                "text": text,
+                "parse_mode": "HTML",
+            }
+            if reply_markup is not None:
+                payload["reply_markup"] = reply_markup
+            cls.send_heavy_request(url, data=payload)
+            logger.info(f"Notified admin telegram chat synchronously: {text}")
+        except Exception as exc:
+            logger.warning(f"Failed to notify admin telegram chat synchronously: {exc}")
+
+    @classmethod
+    def send_media_and_message(cls, photos: list, text: str, reply_markup: dict = None) -> None:
+        """
+        Sends photos first in sequential order, then sends the text message with reply_markup.
+        Runs in a single background thread so Telegram receives items in exact order.
+        """
+        def _task():
+            for photo, caption in photos:
+                cls.send_photo_sync(photo, caption=caption)
+            cls.send_sync(text, reply_markup=reply_markup)
+
+        executor.submit(_task)
+
+    @classmethod
     def answer_callback_query(cls, callback_query_id: str, text: str = None, show_alert: bool = False):
         token = cls.get_token()
         if not token or not callback_query_id:

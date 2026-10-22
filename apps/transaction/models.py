@@ -50,17 +50,21 @@ class UserSumma(BaseModel):
     user = models.ForeignKey(User, models.CASCADE, 'points')
     bonus = models.ForeignKey(Bonus, models.SET_NULL, 'redemptions', null=True, blank=True,
                               verbose_name="Бонус")
-    code = models.OneToOneField(BonusCode, models.CASCADE, related_name='redemption', verbose_name="Код")
-    store = models.ForeignKey("shared.Store", on_delete=models.SET_NULL, null=True, related_name="bonus_claims")
+    code = models.OneToOneField(BonusCode, models.CASCADE, related_name='redemption',
+                                verbose_name="Код")
+    store = models.ForeignKey("shared.Store", on_delete=models.SET_NULL, null=True,
+                              related_name="bonus_claims")
     product = models.ForeignKey(
         Product, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="bonus_redemptions", verbose_name="Mahsulot",
     )
     summa = models.IntegerField(default=0, verbose_name="Сумма")
-    status = models.CharField(max_length=20, choices=BonusClaimStatus.choices, default=BonusClaimStatus.PENDING)
+    status = models.CharField(max_length=20, choices=BonusClaimStatus.choices,
+                              default=BonusClaimStatus.PENDING)
     rejection_reason = models.TextField(blank=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
-    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviewed_claims")
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="reviewed_claims")
     is_expired = models.BooleanField(default=False, verbose_name="Истёк")
 
     def __str__(self):

@@ -14,6 +14,7 @@ class RejectClaimForm(forms.Form):
 
 class BonusCodeInline(admin.TabularInline):
     model = BonusCode
+    extra = 0
     fields = ('code', 'is_used')
 
 
@@ -21,6 +22,7 @@ class BonusInline(admin.TabularInline):
     model = Bonus
     fields = ('summa', 'prefix', 'quantity', 'is_active')
     max_num = 10
+    extra = 0
     verbose_name = "Bonus"
     verbose_name_plural = "Bonuses"
 

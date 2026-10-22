@@ -211,3 +211,71 @@ class TelegramLoginOtpTestCase(APITestCase):
         otp = Otp.objects.filter(user=token_row.user).first()
         self.assertIsNotNone(otp)
 
+    @patch("apps.notification.services.admin_telegram_service.AdminTelegramNotifier.edit_message_text")
+    @patch("apps.notification.services.admin_telegram_service.AdminTelegramNotifier.answer_callback_query")
+    def test_approve_and_reject_order_callback(self, mock_answer, mock_edit):
+        from apps.order.models import Order, OrderState
+        from apps.user.models import User
+        from apps.user.services.telegram import TgOtpService
+
+        user = User.objects.create_user(
+            username="998901112233",
+            first_name="TestBuyer",
+            balance=100000,
+        )
+        order = Order.objects.create(
+            user=user,
+            total_price=50000,
+            state=OrderState.CHECKING,
+        )
+
+        # Test Approve
+        TgOtpService.handle_update({
+            "update_id": 100,
+            "callback_query": {
+                "id": "cb_1",
+                "from": {"id": 111, "first_name": "AdminUser", "username": "admin_one"},
+                "message": {"message_id": 99, "chat": {"id": -100123}, "text": f"Order #{order.id}"},
+                "data": f"approve_order_{order.id}",
+            },
+        })
+
+        order.refresh_from_db()
+        self.assertEqual(order.state, OrderState.ACCEPTED)
+        mock_answer.assert_called_with("cb_1", text="✅ Buyurtma tasdiqlandi!")
+        mock_edit.assert_called_once()
+        args, kwargs = mock_edit.call_args
+        self.assertEqual(kwargs.get("reply_markup"), {"inline_keyboard": []})
+        self.assertIn("Tasdiqlandi (@admin_one)", args[2])
+
+        # Test Reject on a new checking order
+        order2 = Order.objects.create(
+            user=user,
+            total_price=40000,
+            state=OrderState.CHECKING,
+        )
+        initial_balance = user.balance
+        mock_edit.reset_mock()
+        mock_answer.reset_mock()
+
+        TgOtpService.handle_update({
+            "update_id": 101,
+            "callback_query": {
+                "id": "cb_2",
+                "from": {"id": 111, "first_name": "AdminUser", "username": "admin_one"},
+                "message": {"message_id": 100, "chat": {"id": -100123}, "text": f"Order #{order2.id}"},
+                "data": f"reject_order_{order2.id}",
+            },
+        })
+
+        order2.refresh_from_db()
+        self.assertEqual(order2.state, OrderState.CANCELLED)
+        user.refresh_from_db()
+        self.assertEqual(user.balance, initial_balance + 40000)
+        mock_answer.assert_called_with("cb_2", text="❌ Buyurtma bekor qilindi!")
+        mock_edit.assert_called_once()
+        args2, kwargs2 = mock_edit.call_args
+        self.assertEqual(kwargs2.get("reply_markup"), {"inline_keyboard": []})
+        self.assertIn("Bekor qilindi (@admin_one)", args2[2])
+
+

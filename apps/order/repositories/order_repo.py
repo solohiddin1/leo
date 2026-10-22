@@ -176,12 +176,35 @@ class OrderRepo:
 
         cart_items.delete()
 
+        product_lines = []
+        photos_to_send = []
+        seen_product_ids = set()
+
+        for item in items:
+            product = item.product
+            item_summa = item.price * item.quantity
+            item_summa_str = f"{item_summa:,}".replace(",", " ")
+            product_lines.append(f"• <b>{product.name}</b> x {item.quantity} = {item_summa_str} so'm")
+
+            if product.id not in seen_product_ids:
+                seen_product_ids.add(product.id)
+                img = product.images.first()
+                if img and img.image:
+                    photos_to_send.append((img.image, f"📦 <b>{product.name}</b>"))
+
+        products_text = "\n".join(product_lines) if product_lines else "N/A"
+        store_line = f"<b>Do'kon:</b> {order.store.name}\n" if order.store else ""
+        total_price_str = f"{order.total_price:,}".replace(",", " ")
+
         admin_msg = (
             f"🆕 <b>Yangi Buyurtma Yaratildi!</b>\n\n"
             f"<b>Order ID:</b> #{order.id}\n"
             f"<b>Mijoz:</b> {user.first_name} {user.last_name} (@{user.telegram_username or 'N/A'})\n"
             f"<b>Telegram ID:</b> {user.telegram_id or 'N/A'}\n"
-            f"<b>Summa:</b> {order.total_price} so'm"
+            f"<b>Telefon:</b> {user.username}\n"
+            f"{store_line}"
+            f"<b>Mahsulotlar:</b>\n{products_text}\n\n"
+            f"<b>Summa:</b> {total_price_str} so'm"
         )
         reply_markup = {
             "inline_keyboard": [
@@ -191,7 +214,11 @@ class OrderRepo:
                 ]
             ]
         }
-        AdminTelegramNotifier.send(admin_msg, reply_markup=reply_markup)
+        AdminTelegramNotifier.send_media_and_message(
+            photos=photos_to_send,
+            text=admin_msg,
+            reply_markup=reply_markup,
+        )
 
         title, body = NotificationMessages.order_created_msg.render(user.lang, order_id=order.id)
         NotificationService.send_to_user(
