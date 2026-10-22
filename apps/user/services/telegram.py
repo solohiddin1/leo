@@ -33,6 +33,28 @@ CONTACT_KEYBOARD = {
 }
 REMOVE_KEYBOARD = {"remove_keyboard": True}
 
+DEFAULT_BONUS_REJECTION_REASONS = {
+    "uz": (
+        "Assalomu alaykum, hurmatli LEO USTA BOT foydalanuvchilari! Ustalar uchun bonusdan foydalanish qoidalari, ya'ni:\n\n"
+        "Sotib olingan mahsulotning yuborilgan kodi, so'ng esa mahsulotning o'rnatilgan holatdagi rasmlari bo'lishi kerak.\n\n"
+        "Siz yuborgan rasm bu qoidaga to'g'ri kelmaydi🚫\n\n"
+        "Iltimos, qaytadan nasos o'rnatilgan holatdagi rasmlarni jo'nating."
+    ),
+    "ru": (
+        "Здравствуйте, уважаемые пользователи LEO USTA BOT! Правила использования бонусов для мастеров, а именно:\n\n"
+        "Сначала отправляется код купленного товара, а затем должны быть фотографии товара в установленном виде.\n\n"
+        "Отправленное вами фото не соответствует этому правилу🚫\n\n"
+        "Пожалуйста, отправьте заново фотографии установленного насоса."
+    ),
+}
+
+DEFAULT_BONUS_REJECTION_REASON = DEFAULT_BONUS_REJECTION_REASONS["uz"]
+
+
+def get_default_bonus_rejection_reason(lang: str = "uz") -> str:
+    lang = (lang or "uz").lower()
+    return DEFAULT_BONUS_REJECTION_REASONS.get(lang, DEFAULT_BONUS_REJECTION_REASONS["uz"])
+
 
 class TelegramClient:
     @classmethod
@@ -56,7 +78,8 @@ class TgOtpService:
     @classmethod
     def request(cls):
         config = SiteConfig.objects.first()
-        otp_mode = config.send_otp_code if config else False
+        # otp_mode = config.send_otp_code if config else True
+        otp_mode = True
 
         token = secrets.token_urlsafe(32)
         expires_at = timezone.now() + timedelta(
@@ -182,11 +205,17 @@ class TgOtpService:
     @classmethod
     def _handle_contact(cls, chat_id, telegram_id, frm, contact):
         logger.info(f"contact : {contact}, {contact.get('phone_number')} phone number")
-        if contact.get("user_id") != telegram_id:
+        if contact.get("user_id") and contact.get("user_id") != telegram_id:
             TelegramClient.send_message(chat_id, WRONG_CONTACT_MSG)
             return
 
-        row = TelegramRepo.get_pending_token_by_telegram_id(telegram_id)
+        phone = cls._normalize_phone(contact.get("phone_number") or "")
+        cls._process_phone(chat_id, telegram_id, frm, phone)
+
+    @classmethod
+    def _process_phone(cls, chat_id, telegram_id, frm, phone, row=None):
+        if not row:
+            row = TelegramRepo.get_pending_token_by_telegram_id(telegram_id)
         logger.info(f"contact from telegram login {row}, {telegram_id}")
         if not row:
             return
@@ -196,7 +225,6 @@ class TgOtpService:
             )
             return
 
-        phone = cls._normalize_phone(contact.get("phone_number") or "")
         user = cls._link_or_create_user(phone, telegram_id, frm)
 
         if row.otp_mode:
@@ -207,7 +235,9 @@ class TgOtpService:
                 )
                 return
             TelegramRepo.set_user(row, user)
-            TelegramClient.send_message(chat_id, cls._otp_msg(result))
+            TelegramClient.send_message(
+                chat_id, cls._otp_msg(result), reply_markup=REMOVE_KEYBOARD
+            )
         else:
             user.is_verified = True
             user.save(update_fields=["is_verified"])
@@ -225,8 +255,8 @@ class TgOtpService:
 
         message = update.get("message") or {}
         if message.get("reply_to_message"):
-            cls._handle_reply_message(message)
-            return
+            if cls._handle_reply_message(message):
+                return
 
         frm = message.get("from") or {}
         telegram_id = frm.get("id")
@@ -240,9 +270,17 @@ class TgOtpService:
             cls._handle_contact(chat_id, telegram_id, frm, contact)
             return
 
-        text = message.get("text") or ""
+        text = (message.get("text") or "").strip()
         if text.startswith("/start"):
             cls._handle_start(chat_id, telegram_id, frm, text)
+            return
+
+        phone = cls._normalize_phone(text)
+        if len(phone) == 12 and phone.startswith("998"):
+            row = TelegramRepo.get_pending_token_by_telegram_id(telegram_id)
+            if row and cls._is_usable(row):
+                cls._process_phone(chat_id, telegram_id, frm, phone, row=row)
+                return
 
     @classmethod
     def _handle_callback_query(cls, cb):
@@ -319,9 +357,36 @@ class TgOtpService:
             except Exception as e:
                 logger.warning(f"Error in approve_bonus callback: {e}")
 
-        elif data.startswith("reject_bonus_"):
+        elif data.startswith("reject_bonus_def_"):
             try:
-                claim_id = int(data.replace("reject_bonus_", ""))
+                claim_id = int(data.replace("reject_bonus_def_", ""))
+                claim = UserSumma.objects.filter(id=claim_id).select_related("user").first()
+                if not claim:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text="Ariza topilmadi", show_alert=True)
+                    return
+                if claim.status != BonusClaimStatus.PENDING:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Ariza allaqachon {claim.status} holatida", show_alert=True)
+                    return
+                user_lang = getattr(claim.user, "lang", "uz") or "uz"
+                reason = get_default_bonus_rejection_reason(user_lang)
+                BonusService.reject_claim(claim_id, admin_user=None, reason=reason)
+                AdminTelegramNotifier.answer_callback_query(cb_id, text="❌ Standart sabab bilan bekor qilindi!")
+                if chat_id and msg_id:
+                    new_text = (
+                        (message.get("text") or message.get("caption") or f"Claim #{claim_id}")
+                        + f"\n\n❌ <b>Bekor qilindi (@{admin_username})</b>\n<b>Sabab:</b> Standart sabab (Rasm qoidaga to'g'ri kelmaydi)"
+                    )
+                    if message.get("caption"):
+                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text)
+                    else:
+                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text)
+                AdminTelegramNotifier.send(f"❌ Bonus ariza #{claim_id} standart sabab bilan bekor qilindi.")
+            except Exception as e:
+                logger.warning(f"Error in reject_bonus_def callback: {e}")
+
+        elif data.startswith("reject_bonus_custom_"):
+            try:
+                claim_id = int(data.replace("reject_bonus_custom_", ""))
                 claim = UserSumma.objects.filter(id=claim_id).first()
                 if not claim:
                     AdminTelegramNotifier.answer_callback_query(cb_id, text="Ariza topilmadi", show_alert=True)
@@ -333,6 +398,59 @@ class TgOtpService:
                 prompt_text = f"❌ Bonus ariza #{claim_id} bekor qilish sababini ushbu xabarga reply tarzida yozing (msg:{msg_id}):"
                 force_reply = {"force_reply": True, "selective": True}
                 AdminTelegramNotifier.send(prompt_text, reply_markup=force_reply)
+            except Exception as e:
+                logger.warning(f"Error in reject_bonus_custom callback: {e}")
+
+        elif data.startswith("bonus_back_"):
+            try:
+                claim_id = int(data.replace("bonus_back_", ""))
+                initial_keyboard = {
+                    "inline_keyboard": [
+                        [
+                            {"text": "✅ Tasdiqlash", "callback_data": f"approve_bonus_{claim_id}"},
+                            {"text": "❌ Bekor qilish", "callback_data": f"reject_bonus_{claim_id}"},
+                        ]
+                    ]
+                }
+                AdminTelegramNotifier.edit_message_reply_markup(chat_id, msg_id, initial_keyboard)
+                AdminTelegramNotifier.answer_callback_query(cb_id, text="Orqaga qaytildi")
+            except Exception as e:
+                logger.warning(f"Error in bonus_back callback: {e}")
+
+        elif data.startswith("reject_bonus_"):
+            try:
+                claim_id = int(data.replace("reject_bonus_", ""))
+                claim = UserSumma.objects.filter(id=claim_id).first()
+                if not claim:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text="Ariza topilmadi", show_alert=True)
+                    return
+                if claim.status != BonusClaimStatus.PENDING:
+                    AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Ariza allaqachon {claim.status} holatida", show_alert=True)
+                    return
+                rejection_keyboard = {
+                    "inline_keyboard": [
+                        [
+                            {
+                                "text": "🚫 Standart sabab (Rasm mos emas)",
+                                "callback_data": f"reject_bonus_def_{claim_id}",
+                            }
+                        ],
+                        [
+                            {
+                                "text": "✍️ Boshqa sabab yozish",
+                                "callback_data": f"reject_bonus_custom_{claim_id}",
+                            }
+                        ],
+                        [
+                            {
+                                "text": "⬅️ Orqaga",
+                                "callback_data": f"bonus_back_{claim_id}",
+                            }
+                        ],
+                    ]
+                }
+                AdminTelegramNotifier.edit_message_reply_markup(chat_id, msg_id, rejection_keyboard)
+                AdminTelegramNotifier.answer_callback_query(cb_id, text="Bekor qilish usulini tanlang")
             except Exception as e:
                 logger.warning(f"Error in reject_bonus callback: {e}")
 
@@ -367,11 +485,13 @@ class TgOtpService:
                     AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text)
                     AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text)
                 AdminTelegramNotifier.send(f"❌ Buyurtma #{order_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
-            return
+            return True
 
         bonus_match = re.search(r"Bonus\s+ariza\s+#(\d+)\s+bekor\s+qilish.*\(msg:(\d+)\)", parent_text)
         if not bonus_match:
             bonus_match = re.search(r"Bonus\s+ariza\s+#(\d+)\s+bekor\s+qilish", parent_text)
+        if not bonus_match:
+            bonus_match = re.search(r"Claim\s+ID:\s*#(\d+)", parent_text)
 
         if bonus_match:
             claim_id = int(bonus_match.group(1))
@@ -382,7 +502,9 @@ class TgOtpService:
                 AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text)
                 AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text)
             AdminTelegramNotifier.send(f"❌ Bonus ariza #{claim_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
-            return
+            return True
+
+        return False
 
     @staticmethod
     def _success_msg():
@@ -426,5 +548,7 @@ class TgOtpService:
                 first_name=frm.get("first_name") or "",
                 last_name=frm.get("last_name") or "",
             )
+            from apps.transaction.services.bonus_service import BonusService
+            BonusService.award_signup_bonus(user)
         UserRepo.attach_telegram(user, telegram_id, frm.get("username"))
         return user

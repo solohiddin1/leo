@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count, Q
@@ -8,7 +10,7 @@ from apps.notification.services.admin_telegram_service import AdminTelegramNotif
 from apps.shared.repositories.store_repo import StoreRepo
 from apps.shared.utils.result_codes import ResultCodes
 from apps.shared.utils.utils import error_response, success_response
-from apps.transaction.models import BonusClaimStatus, BonusCode
+from apps.transaction.models import BonusClaimStatus, BonusCode, UserSumma
 from apps.transaction.repositories.bonus_repo import BonusRepo
 from apps.transaction.repositories.challenge_repo import ChallengeRepo
 from apps.user.models import User
@@ -39,6 +41,8 @@ class BonusService:
             return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
         if bonus_code.is_used:
             return error_response(ResultCodes.BONUS_CODE_ALREADY_USED)
+        if not bonus_code.bonus or not bonus_code.bonus.is_active:
+            return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
 
         return success_response({'summa': bonus_code.bonus.summa})
 
@@ -62,8 +66,8 @@ class BonusService:
                 return error_response(ResultCodes.BONUS_CODE_ALREADY_USED)
 
             bonus = bonus_code.bonus
-            if not bonus:
-                return error_response(ResultCodes.BONUS_CODE_INVALID)
+            if not bonus or not bonus.is_active:
+                return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
 
             store = None
             if store_id:
@@ -109,8 +113,8 @@ class BonusService:
                 return error_response(ResultCodes.BONUS_CODE_ALREADY_USED)
 
             bonus = bonus_code.bonus
-            if not bonus:
-                return error_response(ResultCodes.BONUS_CODE_INVALID)
+            if not bonus or not bonus.is_active:
+                return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
 
             user_summa = BonusRepo.create_claim(user, bonus, bonus_code, store=None)
             BonusRepo.mark_used(bonus_code)
@@ -294,6 +298,19 @@ class BonusService:
                 ]
             }
 
+        # Send user-uploaded bonus redemption images if available
+        claim = None
+        if claim_id:
+            claim = UserSumma.objects.filter(id=claim_id).prefetch_related("images").first()
+        elif hasattr(code, "redemption") and code.redemption:
+            claim = code.redemption
+
+        if claim:
+            for idx, img_obj in enumerate(claim.images.all(), start=1):
+                if img_obj.image:
+                    img_caption = f"📷 Bonus #{claim.id} rasm {idx} ({code.code})"
+                    AdminTelegramNotifier.send_photo(img_obj.image, caption=img_caption)
+
         AdminTelegramNotifier.send(msg, reply_markup=reply_markup)
 
     @staticmethod
@@ -367,4 +384,113 @@ class BonusService:
             'approved_percentage': calc_pct(approved, total),
             'rejected_count': rejected,
             'rejected_percentage': calc_pct(rejected, total),
+        }
+
+    SIGNUP_BONUS_AMOUNT = 50_000
+
+    @staticmethod
+    def award_signup_bonus(user: User, amount: int = SIGNUP_BONUS_AMOUNT) -> None:
+        from apps.notification.messages import NotificationMessages, NotificationType
+        from apps.notification.services.notification_service import NotificationService
+
+        user.balance += amount
+        user.save(update_fields=['balance'])
+        BonusService._clear_user_balance_cache(user.id)
+
+        try:
+            title, body = NotificationMessages.signup_bonus_msg.render(user.lang, summa=amount)
+            NotificationService.send_to_user(
+                user=user,
+                title=title,
+                body=body,
+                notification_type="BONUS",
+                data={
+                    "type": NotificationType.SIGNUP_BONUS.value,
+                    "summa": amount,
+                },
+            )
+        except Exception:
+            pass
+
+    @staticmethod
+    def process_expired_points(cutoff_date=None) -> dict:
+        from apps.notification.messages import NotificationMessages, NotificationType
+        from apps.notification.services.notification_service import NotificationService
+
+        now = timezone.now()
+        one_year_ago = cutoff_date or (now - timedelta(days=365))
+        one_week_left = (now - timedelta(days=365 - 7)).date()
+
+        expired_points = UserSumma.objects.filter(
+            status=BonusClaimStatus.APPROVED,
+            created_at__lte=one_year_ago,
+            is_expired=False,
+        ).select_related('user')
+
+        expired_count = 0
+        expired_summa = 0
+
+        for point in expired_points:
+            with transaction.atomic():
+                user = point.user
+                user.balance = max(0, user.balance - point.summa)
+                user.save(update_fields=['balance'])
+                point.is_expired = True
+                point.save(update_fields=['is_expired'])
+                BonusService._clear_user_balance_cache(user.id)
+
+                expired_count += 1
+                expired_summa += point.summa
+
+                try:
+                    title, body = NotificationMessages.points_expired_msg.render(
+                        user.lang, summa=point.summa
+                    )
+                    NotificationService.send_to_user(
+                        user=user,
+                        title=title,
+                        body=body,
+                        notification_type="BONUS",
+                        data={
+                            "type": NotificationType.POINTS_EXPIRED.value,
+                            "summa": point.summa,
+                            "claim_id": point.id,
+                        },
+                    )
+                except Exception:
+                    pass
+
+        # Warn users whose points expire in 7 days
+        points_soon_to_expire = UserSumma.objects.filter(
+            status=BonusClaimStatus.APPROVED,
+            created_at__date=one_week_left,
+            is_expired=False,
+        ).select_related('user')
+
+        warned_count = 0
+        for point in points_soon_to_expire:
+            try:
+                user = point.user
+                title, body = NotificationMessages.points_expiring_warning_msg.render(
+                    user.lang, summa=point.summa
+                )
+                NotificationService.send_to_user(
+                    user=user,
+                    title=title,
+                    body=body,
+                    notification_type="BONUS",
+                    data={
+                        "type": NotificationType.POINTS_EXPIRING_WARNING.value,
+                        "summa": point.summa,
+                        "claim_id": point.id,
+                    },
+                )
+                warned_count += 1
+            except Exception:
+                pass
+
+        return {
+            "expired_count": expired_count,
+            "expired_summa": expired_summa,
+            "warned_count": warned_count,
         }

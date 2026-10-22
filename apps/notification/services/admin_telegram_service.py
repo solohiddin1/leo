@@ -142,3 +142,20 @@ class AdminTelegramNotifier:
             executor.submit(cls.send_heavy_request, url, data=payload)
         except Exception as exc:
             logger.warning(f"Failed to edit message caption: {exc}")
+
+    @classmethod
+    def edit_message_reply_markup(cls, chat_id, message_id, reply_markup: dict = None):
+        token = cls.get_token()
+        if not token or not chat_id or not message_id:
+            return
+        try:
+            url = f"https://api.telegram.org/bot{token}/editMessageReplyMarkup"
+            payload = {
+                "chat_id": chat_id,
+                "message_id": message_id,
+            }
+            if reply_markup is not None:
+                payload["reply_markup"] = reply_markup
+            executor.submit(cls.send_heavy_request, url, data=payload)
+        except Exception as exc:
+            logger.warning(f"Failed to edit message reply markup: {exc}")

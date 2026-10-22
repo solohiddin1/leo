@@ -16,6 +16,7 @@ from apps.shared.models import (
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):
     list_display = ("id", "soato_id", "name_uz", "name_ru", "name_en")
+    search_fields = ("name_uz", "name_ru", "name_en", "soato_id")
 
 
 @admin.register(Store)

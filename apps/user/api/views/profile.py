@@ -44,3 +44,6 @@ class UserLangUpdateAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return success_response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        return self.patch(request, *args, **kwargs)

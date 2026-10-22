@@ -16,6 +16,7 @@ urlpatterns: list[URLPattern | URLResolver] = [
     path("api/v1/transaction/", include("apps.transaction.urls")),
     path("api/v1/order/", include("apps.order.urls")),
     path("api/v1/notification/", include("apps.notification.urls")),
+    path("api/v1/internal/", include("apps.integrations.urls")),
 ]
 
 if settings.DEBUG:

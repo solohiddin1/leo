@@ -4,7 +4,7 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.shortcuts import render
 
 from apps.shared.utils.preview import image_preview_with_no_compressed
-from apps.transaction.models import Bonus, BonusCode, UserSumma, UserSummaImage, Challenge
+from apps.transaction.models import Bonus, BonusCode, Challenge, UserSumma, UserSummaImage
 from apps.transaction.services.bonus_service import BonusService
 
 
@@ -14,13 +14,12 @@ class RejectClaimForm(forms.Form):
 
 class BonusCodeInline(admin.TabularInline):
     model = BonusCode
-    extra = 1
     fields = ('code', 'is_used')
 
 
 class BonusInline(admin.TabularInline):
     model = Bonus
-    fields = ('summa', 'prefix', 'quantity')
+    fields = ('summa', 'prefix', 'quantity', 'is_active')
     max_num = 10
     verbose_name = "Bonus"
     verbose_name_plural = "Bonuses"
@@ -31,20 +30,26 @@ class BonusInline(admin.TabularInline):
 
 @admin.register(Bonus)
 class BonusAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'summa', 'prefix', 'quantity', 'code_count')
+    list_display = ('id', 'product', 'summa', 'prefix', 'quantity', 'is_active', 'code_count')
+    search_fields = ('prefix', 'product__name', 'product__name_uz', 'product__name_ru')
+    list_filter = ('is_active',)
+    list_editable = ('is_active',)
     list_select_related = ('product',)
     # inlines = [BonusCodeInline]
 
     def code_count(self, obj):
-        return obj.codes.count()
-    code_count.short_description = 'Generated'
+        used = obj.codes.filter(is_used=True).count()
+        total = obj.codes.count()
+        return f"{used} / {total} (sig'im: {obj.quantity})"
+
+    code_count.short_description = "Ishlatilgan / Baza (Sig'im)"
 
 
 @admin.register(BonusCode)
 class BonusCodeAdmin(admin.ModelAdmin):
     list_display = ('code', 'bonus_info', 'is_used', 'created_at')
     list_filter = ('is_used', 'bonus')
-    search_fields = ('code',)
+    search_fields = ('code', 'bonus__prefix', 'bonus__product__name', 'bonus__product__name_uz', 'bonus__product__name_ru')
     list_select_related = ('bonus', 'bonus__product')
 
     def bonus_info(self, obj):
@@ -62,7 +67,15 @@ class UserSummaImageInline(admin.TabularInline):
 class UserSummaAdmin(admin.ModelAdmin):
     list_display = ('user', 'get_code', 'product', 'status', 'summa', 'is_expired', 'created_at')
     list_filter = ('is_expired', 'product')
-    search_fields = ('code__code', 'user__username')
+    search_fields = (
+        'code__code',
+        'user__username',
+        'user__first_name',
+        'user__last_name',
+        'product__name',
+        'product__name_uz',
+        'product__name_ru',
+    )
     readonly_fields = ('user', 'bonus', 'code', 'product', 'summa', 'created_at')
     list_select_related = ('user', 'bonus', 'code', 'product')
     inlines = [UserSummaImageInline]
@@ -133,6 +146,7 @@ class UserSummaAdmin(admin.ModelAdmin):
 class ChallengeAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'description', 'start_date', 'end_date', 'is_active')
     list_filter = ('is_active',)
+    search_fields = ('title', 'description')
     actions = ['activate_challenges', 'deactivate_challenges']
 
     def activate_challenges(self, request, queryset):

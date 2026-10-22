@@ -15,6 +15,7 @@ DEBUG = "True"
 ALLOWED_HOSTS = ["*"]
 
 BASE = [
+    "apps.shared",
     "jazzmin",
     "modeltranslation",
     # "django.contrib.admin",
@@ -34,11 +35,11 @@ LIBS = [
 
 APPS = [
     "apps.user",
-    "apps.shared",
     "apps.product",
     "apps.order",
     "apps.transaction",
     "apps.notification",
+    "apps.integrations",
 ]
 
 INSTALLED_APPS = BASE + LIBS + APPS
@@ -77,18 +78,32 @@ WSGI_APPLICATION = "root.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#         "OPTIONS": {
+#             "timeout": 20,
+#             "init_command": (
+#                 "PRAGMA journal_mode=WAL;"
+#                 "PRAGMA synchronous=NORMAL;"
+#                 "PRAGMA busy_timeout=5000;"
+#             ),
+#         },
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-        "OPTIONS": {
-            "timeout": 20,
-            "init_command": (
-                "PRAGMA journal_mode=WAL;"
-                "PRAGMA synchronous=NORMAL;"
-                "PRAGMA busy_timeout=5000;"
-            ),
-        },
+    'default': {
+        'ENGINE': getenv('DB_ENGINE'),
+        'NAME': getenv('DB_NAME'),
+        'USER': getenv('DB_USER'),
+        'PASSWORD': getenv('DB_PASSWORD'),
+        'HOST': getenv('DB_HOST'),
+        'PORT': getenv('DB_PORT'),
+
+        'CONN_MAX_AGE': int(getenv('DB_CONN_MAX_AGE', default=300)),
+        'CONN_HEALTH_CHECKS': True,
     }
 }
 
@@ -222,4 +237,7 @@ FIREBASE_CREDENTIALS_FILE = getenv(
     "FIREBASE_CREDENTIALS_FILE", str("firebase/leo-usta-firebase-adminsdk-fbsvc-41b6970f3f.json")
 )
 
+INTERNAL_API_TOKEN = getenv("INTERNAL_API_TOKEN")
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2500000

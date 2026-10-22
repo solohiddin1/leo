@@ -15,7 +15,8 @@ class Bonus(models.Model):
         blank=True,
         default="",
     )
-    quantity = models.PositiveIntegerField(default=9999, verbose_name="Amount of code")
+    quantity = models.PositiveIntegerField(default=10000, verbose_name="Amount of code")
+    is_active = models.BooleanField(default=True, verbose_name="Is Active")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
@@ -57,7 +58,7 @@ class UserSumma(BaseModel):
     )
     summa = models.IntegerField(default=0, verbose_name="Сумма")
     status = models.CharField(max_length=20, choices=BonusClaimStatus.choices, default=BonusClaimStatus.PENDING)
-    rejection_reason = models.CharField(max_length=255, blank=True)
+    rejection_reason = models.TextField(blank=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
     reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviewed_claims")
     is_expired = models.BooleanField(default=False, verbose_name="Истёк")

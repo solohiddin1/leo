@@ -40,6 +40,7 @@ class SetProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "region",
             "job",
+            "lang",
         ]
 
 

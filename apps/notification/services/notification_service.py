@@ -38,6 +38,12 @@ class NotificationService:
         notification = NotificationRepo.create(user, title, body, notification_type, data)
         for device in DeviceRepo.get_user_active_devices(user):
             NotificationService._push_to_device(notification, None, device, title, body, data)
+        if getattr(user, "telegram_id", None):
+            try:
+                from apps.user.services.telegram import TelegramClient
+                TelegramClient.send_message(user.telegram_id, f"<b>{title}</b>\n\n{body}")
+            except Exception:
+                pass
         return notification
 
     @staticmethod

@@ -5,18 +5,21 @@ from django.dispatch import receiver
 
 from apps.transaction.models import Bonus, BonusCode
 
-_STRIP_ZEROS_RE = re.compile(r"^(.*?)(0*)$")
+_CLEAN_PREFIX_RE = re.compile(r"^(.*?)[A-Z]0+$")
 
 
 @receiver(post_save, sender=Bonus)
 def generate_bonus_codes(sender, instance: Bonus, created, **kwargs):
+    if kwargs.get('raw'):
+        return
+
     if not created:
         return
 
     if not instance.prefix or instance.quantity <= 0:
         return
 
-    match = _STRIP_ZEROS_RE.match(instance.prefix)
+    match = _CLEAN_PREFIX_RE.match(instance.prefix)
     clean_prefix = match.group(1) if match else instance.prefix
 
     existing_codes = set(
@@ -38,4 +41,4 @@ def generate_bonus_codes(sender, instance: Bonus, created, **kwargs):
 
         serial += 1
 
-    BonusCode.objects.bulk_create(new_codes, ignore_conflicts=True)
+    BonusCode.objects.bulk_create(new_codes, ignore_conflicts=True, batch_size=2000)
