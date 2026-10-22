@@ -305,7 +305,7 @@ class TgOtpService:
                 if not order:
                     AdminTelegramNotifier.answer_callback_query(cb_id, text="Buyurtma topilmadi", show_alert=True)
                     return
-                if order.state != OrderState.PENDING:
+                if order.state != OrderState.CHECKING:
                     AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Buyurtma allaqachon {order.state} holatida", show_alert=True)
                     return
                 OrderRepo.approve_order(order)
@@ -313,9 +313,9 @@ class TgOtpService:
                 if chat_id and msg_id:
                     new_text = (message.get("text") or message.get("caption") or f"Order #{order_id}") + f"\n\n✅ <b>Tasdiqlandi (@{admin_username})</b>"
                     if message.get("caption"):
-                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text)
+                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text, reply_markup={"inline_keyboard": []})
                     else:
-                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text)
+                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text, reply_markup={"inline_keyboard": []})
             except Exception as e:
                 logger.warning(f"Error in approve_order callback: {e}")
 
@@ -326,13 +326,17 @@ class TgOtpService:
                 if not order:
                     AdminTelegramNotifier.answer_callback_query(cb_id, text="Buyurtma topilmadi", show_alert=True)
                     return
-                if order.state != OrderState.PENDING:
+                if order.state != OrderState.CHECKING:
                     AdminTelegramNotifier.answer_callback_query(cb_id, text=f"Buyurtma allaqachon {order.state} holatida", show_alert=True)
                     return
-                AdminTelegramNotifier.answer_callback_query(cb_id, text="Iltimos, bekor qilish sababini kiriting")
-                prompt_text = f"❌ Buyurtma #{order_id} bekor qilish sababini ushbu xabarga reply tarzida yozing (msg:{msg_id}):"
-                force_reply = {"force_reply": True, "selective": True}
-                AdminTelegramNotifier.send(prompt_text, reply_markup=force_reply)
+                OrderRepo.reject_order(order)
+                AdminTelegramNotifier.answer_callback_query(cb_id, text="❌ Buyurtma bekor qilindi!")
+                if chat_id and msg_id:
+                    new_text = (message.get("text") or message.get("caption") or f"Order #{order_id}") + f"\n\n❌ <b>Bekor qilindi (@{admin_username})</b>"
+                    if message.get("caption"):
+                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text, reply_markup={"inline_keyboard": []})
+                    else:
+                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text, reply_markup={"inline_keyboard": []})
             except Exception as e:
                 logger.warning(f"Error in reject_order callback: {e}")
 
@@ -351,9 +355,9 @@ class TgOtpService:
                 if chat_id and msg_id:
                     new_text = (message.get("text") or message.get("caption") or f"Claim #{claim_id}") + f"\n\n✅ <b>Tasdiqlandi (@{admin_username})</b>"
                     if message.get("caption"):
-                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text)
+                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text, reply_markup={"inline_keyboard": []})
                     else:
-                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text)
+                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text, reply_markup={"inline_keyboard": []})
             except Exception as e:
                 logger.warning(f"Error in approve_bonus callback: {e}")
 
@@ -377,9 +381,12 @@ class TgOtpService:
                         + f"\n\n❌ <b>Bekor qilindi (@{admin_username})</b>\n<b>Sabab:</b> Standart sabab (Rasm qoidaga to'g'ri kelmaydi)"
                     )
                     if message.get("caption"):
-                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text)
+                        AdminTelegramNotifier.edit_message_caption(chat_id, msg_id, new_text, reply_markup={"inline_keyboard": []})
                     else:
-                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text)
+                        AdminTelegramNotifier.edit_message_text(chat_id, msg_id, new_text, reply_markup={"inline_keyboard": []})
+                AdminTelegramNotifier.send(f"❌ Bonus ariza #{claim_id} standart sabab bilan bekor qilindi.")
+            except Exception as e:
+                logger.warning(f"Error in reject_bonus_def callback: {e}")
                 AdminTelegramNotifier.send(f"❌ Bonus ariza #{claim_id} standart sabab bilan bekor qilindi.")
             except Exception as e:
                 logger.warning(f"Error in reject_bonus_def callback: {e}")
@@ -482,8 +489,8 @@ class TgOtpService:
                 OrderRepo.reject_order(order)
                 if chat_id and orig_msg_id:
                     status_text = f"Buyurtma #{order_id}\n\n❌ <b>Bekor qilindi (@{admin_username})</b>\n<b>Sabab:</b> {reason}"
-                    AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text)
-                    AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text)
+                    AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text, reply_markup={"inline_keyboard": []})
+                    AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text, reply_markup={"inline_keyboard": []})
                 AdminTelegramNotifier.send(f"❌ Buyurtma #{order_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
             return True
 
@@ -499,8 +506,8 @@ class TgOtpService:
             BonusService.reject_claim(claim_id, admin_user=None, reason=reason)
             if chat_id and orig_msg_id:
                 status_text = f"Bonus ariza #{claim_id}\n\n❌ <b>Bekor qilindi (@{admin_username})</b>\n<b>Sabab:</b> {reason}"
-                AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text)
-                AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text)
+                AdminTelegramNotifier.edit_message_text(chat_id, orig_msg_id, status_text, reply_markup={"inline_keyboard": []})
+                AdminTelegramNotifier.edit_message_caption(chat_id, orig_msg_id, status_text, reply_markup={"inline_keyboard": []})
             AdminTelegramNotifier.send(f"❌ Bonus ariza #{claim_id} bekor qilindi.\n<b>Sabab:</b> {reason}")
             return True
 
@@ -517,8 +524,9 @@ class TgOtpService:
 
     @staticmethod
     def _no_token_msg():
-        url = settings.TELEGRAM_LOGIN_RETURN_URL
-        return NO_TOKEN_MSG_WITH_URL.format(url=url) if url else NO_TOKEN_MSG
+        # url = settings.TELEGRAM_LOGIN_RETURN_URL
+        # return NO_TOKEN_MSG_WITH_URL.format(url=url) if url else NO_TOKEN_MSG
+        return NO_TOKEN_MSG
 
     @staticmethod
     def _is_usable(row):

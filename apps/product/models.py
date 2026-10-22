@@ -47,8 +47,8 @@ class Product(BaseModel):
 
 class Image(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images", null=True)
-    image = models.ImageField(upload_to="images/")
-    image_compressed = models.ImageField(upload_to="images/compressed/", null=True, blank=True)
+    image = models.ImageField(upload_to="products/")
+    image_compressed = models.ImageField(upload_to="products/compressed/", null=True, blank=True)
 
     def __str__(self):
         return f"{self.image}"

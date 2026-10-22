@@ -26,7 +26,14 @@ def compress_image(
         output_img = img
         output_size = img.size
 
-    if format.upper() in {"JPEG", "JPG", "WEBP"} and output_img.mode not in {"RGB", "L"}:
+    if output_img.mode in ("RGBA", "LA") or (output_img.mode == "P" and "transparency" in output_img.info):
+        if format.upper() in {"JPEG", "JPG"}:
+            output_img = output_img.convert("RGBA")
+            background = Image.new("RGBA", output_img.size, (255, 255, 255, 255))
+            output_img = Image.alpha_composite(background, output_img).convert("RGB")
+        elif format.upper() == "WEBP":
+            output_img = output_img.convert("RGBA")
+    elif output_img.mode not in {"RGB", "RGBA", "L"}:
         output_img = output_img.convert("RGB")
 
     buffer = io.BytesIO()
@@ -36,7 +43,7 @@ def compress_image(
         "optimize": True,
     }
     if format.upper() == "WEBP":
-        save_kwargs["method"] = 6
+        save_kwargs["method"] = 4
 
     output_img.save(buffer, **save_kwargs)
     ext = format.lower()
@@ -46,27 +53,27 @@ def compress_image(
     return ContentFile(buffer.getvalue(), name=filename)
 
 
-def send_product_inquiry_telegram(name, phone_number, message, product_data=None):
-    TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
-    CHAT_ID = settings.CHAT_ID
-
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-
-    inquiry_text = (
-        f"<b>🛒 Yangi Mahsulot So'rovi</b>\n\n"
-        f"<b>👤 Ism:</b> {name}\n"
-        f"<b>📞 Telefon:</b> {phone_number}\n"
-        f"<b>💬 Xabar:</b> {message}\n"
-    )
-
-    if product_data:
-        inquiry_text += (
-            f"\n<b>📦 Mahsulot Ma'lumotlari:</b>\n"
-            f"<b>🔹 Nomi:</b> {product_data.get('name')}\n"
-            f"<b>🔹 Artikul:</b> {product_data.get('sku')}\n"
-            f'<b>🔗 Link:</b> <a href="{product_data.get("url")}">Ko\'rish</a>\n'
-        )
-
-    payload = {"chat_id": CHAT_ID, "text": inquiry_text, "parse_mode": "HTML"}
-    response = requests.post(url, data=payload)
-    return response
+# def send_product_inquiry_telegram(name, phone_number, message, product_data=None):
+#     TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
+#     CHAT_ID = settings.CHAT_ID
+#
+#     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+#
+#     inquiry_text = (
+#         f"<b>🛒 Yangi Mahsulot So'rovi</b>\n\n"
+#         f"<b>👤 Ism:</b> {name}\n"
+#         f"<b>📞 Telefon:</b> {phone_number}\n"
+#         f"<b>💬 Xabar:</b> {message}\n"
+#     )
+#
+#     if product_data:
+#         inquiry_text += (
+#             f"\n<b>📦 Mahsulot Ma'lumotlari:</b>\n"
+#             f"<b>🔹 Nomi:</b> {product_data.get('name')}\n"
+#             f"<b>🔹 Artikul:</b> {product_data.get('sku')}\n"
+#             f'<b>🔗 Link:</b> <a href="{product_data.get("url")}">Ko\'rish</a>\n'
+#         )
+#
+#     payload = {"chat_id": CHAT_ID, "text": inquiry_text, "parse_mode": "HTML"}
+#     response = requests.post(url, data=payload)
+#     return response

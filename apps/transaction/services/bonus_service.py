@@ -7,6 +7,7 @@ from django.utils import timezone
 from rest_framework.request import Request
 
 from apps.notification.services.admin_telegram_service import AdminTelegramNotifier
+from apps.shared.middleware.middleware import get_logger
 from apps.shared.repositories.store_repo import StoreRepo
 from apps.shared.utils.result_codes import ResultCodes
 from apps.shared.utils.utils import error_response, success_response
@@ -14,6 +15,8 @@ from apps.transaction.models import BonusClaimStatus, BonusCode, UserSumma
 from apps.transaction.repositories.bonus_repo import BonusRepo
 from apps.transaction.repositories.challenge_repo import ChallengeRepo
 from apps.user.models import User
+
+logger = get_logger()
 
 
 class BonusService:
@@ -298,7 +301,8 @@ class BonusService:
                 ]
             }
 
-        # Send user-uploaded bonus redemption images if available
+        # Collect user-uploaded bonus redemption images if available
+        photos_to_send = []
         claim = None
         if claim_id:
             claim = UserSumma.objects.filter(id=claim_id).prefetch_related("images").first()
@@ -309,9 +313,14 @@ class BonusService:
             for idx, img_obj in enumerate(claim.images.all(), start=1):
                 if img_obj.image:
                     img_caption = f"📷 Bonus #{claim.id} rasm {idx} ({code.code})"
-                    AdminTelegramNotifier.send_photo(img_obj.image, caption=img_caption)
+                    photos_to_send.append((img_obj.image, img_caption))
 
-        AdminTelegramNotifier.send(msg, reply_markup=reply_markup)
+        # Send all photos first sequentially, then send the message with buttons
+        AdminTelegramNotifier.send_media_and_message(
+            photos=photos_to_send,
+            text=msg,
+            reply_markup=reply_markup,
+        )
 
     @staticmethod
     def get_user_bonuses(user: User, request: Request):
@@ -410,7 +419,7 @@ class BonusService:
                 },
             )
         except Exception:
-            pass
+            logger.error(f"Error in awarding sign up bonus for user: {user}")
 
     @staticmethod
     def process_expired_points(cutoff_date=None) -> dict:
@@ -457,8 +466,10 @@ class BonusService:
                             "claim_id": point.id,
                         },
                     )
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.exception(
+                        f"Failed to send points expired notification for user #{user.id} (claim #{point.id}): {e}"
+                    )
 
         # Warn users whose points expire in 7 days
         points_soon_to_expire = UserSumma.objects.filter(
@@ -486,8 +497,10 @@ class BonusService:
                     },
                 )
                 warned_count += 1
-            except Exception:
-                pass
+            except Exception as e:
+                logger.exception(
+                    f"Failed to send points expiration warning for user #{user.id} (claim #{point.id}): {e}"
+                )
 
         return {
             "expired_count": expired_count,

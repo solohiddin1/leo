@@ -18,3 +18,6 @@ spectacular:
 
 check:
 	python manage.py check
+
+compress:
+	python manage.py compress_images

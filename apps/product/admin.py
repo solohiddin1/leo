@@ -11,7 +11,7 @@ from apps.transaction.admin import BonusInline
 class ImageInline(TabularInline):
     model = Image
     extra = 1
-    readonly_fields = ['image_compressed', "image_preview"]
+    readonly_fields = ["image_preview", 'image_compressed']
     image_preview = image_preview
 
 
@@ -57,7 +57,9 @@ class ProductAdmin(TabbedTranslationAdmin):
         "category__name",
         "category__name_uz",
         "category__name_ru",
+        "bonuses__prefix",
     )
     list_filter = ("is_active", "category")
+    list_editable = ['is_active']
     inlines = [ImageInline, BonusInline]
     image_preview = image_preview_for_product
