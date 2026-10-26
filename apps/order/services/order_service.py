@@ -1,5 +1,7 @@
 from urllib.request import Request
 
+from django.db.models import Q
+
 from apps.order.api.serializers.order import (
     OrderConfirmSerializer,
     OrderCreateSerializer,
@@ -41,6 +43,28 @@ class OrderService:
         cart_items = CartRepo.get_cart_items_by_ids(cart, item_ids)
         if not cart_items.exists():
             return error_response(ResultCodes.CART_ITEM_NOT_FOUND)
+
+        inactive_items = list(
+            cart_items.filter(Q(product__is_active=False) | Q(product__price__lte=0))
+        )
+        if inactive_items:
+            names_uz = ", ".join(item.product.name_uz or item.product.name for item in inactive_items)
+            names_ru = ", ".join(item.product.name_ru or item.product.name for item in inactive_items)
+            names_en = ", ".join(item.product.name for item in inactive_items)
+            first_product = inactive_items[0].product
+            product_name = first_product.name_uz or first_product.name
+            return error_response(
+                result=ResultCodes.PRODUCT_OUT_OF_STOCK,
+                message={
+                    "uz": f"Mahsulot qolmagan: {names_uz}.",
+                    "ru": f"Товара нет в наличии: {names_ru}.",
+                    "en": f"Product out of stock: {names_en}.",
+                },
+                data={
+                    "product_id": first_product.id,
+                    "product_name": product_name,
+                },
+            )
 
         order = OrderRepo.create_order_from_items(user, cart_items, store_id)
         if order is None:

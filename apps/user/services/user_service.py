@@ -30,6 +30,8 @@ class UserService:
 
     @staticmethod
     def login(username: str, password: str):
+        if username:
+            username = username.strip().replace("+", "")
         user = User.objects.filter(username=username).first()
         if user is None or not user.check_password(password):
             return error_response(ResultCodes.INVALID_CREDENTIALS)

@@ -363,7 +363,8 @@ class Command(BaseCommand):
                 self._count("users.matched")
                 continue
 
-            username = fields.get("phone") or f"tg_{chat_id}"
+            phone = (fields.get("phone") or "").strip().replace("+", "")
+            username = phone or f"tg_{chat_id}"
             if username in taken_usernames:
                 username = f"{username}_{chat_id}"
             taken_usernames.add(username)

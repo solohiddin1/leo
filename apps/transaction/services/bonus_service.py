@@ -47,7 +47,8 @@ class BonusService:
         if not bonus_code.bonus or not bonus_code.bonus.is_active:
             return error_response(ResultCodes.BONUS_CODE_NOT_FOUND)
 
-        return success_response({'summa': bonus_code.bonus.summa})
+        return success_response({'summa': bonus_code.bonus.summa,
+                                 'product': bonus_code.bonus.product.name})
 
     @staticmethod
     def redeem_bonus(user: User, raw_code: str, store_id: int = None, images=None):

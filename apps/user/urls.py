@@ -11,6 +11,7 @@ from apps.user.api.views.profile import (
     ProfileUpdateAPIView,
     UserLangUpdateAPIView,
 )
+from apps.user.api.views.profile_image import UserUpdateProfileImage
 from apps.user.api.views.register import RegisterAPIView
 from apps.user.api.views.set_password import SetPasswordAPIView
 from apps.user.api.views.store import UserRedeemedStoreListView
@@ -38,4 +39,5 @@ urlpatterns = [
     path("redeemed-stores/", UserRedeemedStoreListView.as_view(), name="redeemed_stores"),
     path("devices/add/", DeviceAddView.as_view(), name="device_add"),
     path("devices/<int:device_id>/delete/", DeviceDeleteView.as_view(), name="device_delete"),
+    path("update_image/", UserUpdateProfileImage.as_view(), name="update_profile_image"),
 ]

@@ -10,14 +10,6 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class Avatar(BaseModel):
-    name = models.CharField(max_length=128)
-    image = models.ImageField(upload_to="avatars", null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
-
 class User(AbstractUser, BaseModel, PermissionsMixin):
     LANG_CHOICES = (
         ("uz", "Uzbek"),
@@ -45,12 +37,7 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
         related_name="users",
     )
 
-    avatar = models.OneToOneField(
-        Avatar,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []

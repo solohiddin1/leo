@@ -11,3 +11,8 @@ class LoginSerializer(serializers.ModelSerializer[User]):
         model = User
         fields = ["username", "password"]
         extra_kwargs = {"password": {"write_only": True}}
+
+    def validate_username(self, value: str) -> str:
+        if value:
+            return value.strip().replace("+", "")
+        return value

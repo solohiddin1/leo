@@ -28,36 +28,24 @@ def error_response(
     result: ResultCodes,
     message: dict[str, str] | None = None,
     status_code: int = status.HTTP_400_BAD_REQUEST,
+    data: dict | None = None,
 ) -> Response:
-    if message:
-        return Response(
-            {
-                "success": False,
-                "error": {
-                    "code": result.value,
-                    "message": message["en"],
-                    "message_language": {
-                        "uz": message["uz"],
-                        "en": message["en"],
-                        "ru": message["ru"],
-                    },
-                },
-            },
-            status=status_code,
-        )
+    err_body = {
+        "code": result.value,
+        "message": message["en"] if message else ResultMessages[result.name]["en"],
+        "message_language": {
+            "uz": message["uz"] if message else ResultMessages[result.name]["uz"],
+            "en": message["en"] if message else ResultMessages[result.name]["en"],
+            "ru": message["ru"] if message else ResultMessages[result.name]["ru"],
+        },
+    }
+    if data:
+        err_body.update(data)
 
     return Response(
         {
             "success": False,
-            "error": {
-                "code": result.value,
-                "message": ResultMessages[result.name]["en"],
-                "message_language": {
-                    "uz": ResultMessages[result.name]["uz"],
-                    "en": ResultMessages[result.name]["en"],
-                    "ru": ResultMessages[result.name]["ru"],
-                },
-            },
+            "error": err_body,
         },
         status=status_code,
     )

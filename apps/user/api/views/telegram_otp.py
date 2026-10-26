@@ -4,7 +4,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.shared.utils.result_codes import ResultCodes, ERROR_CODE_MAP
+from apps.shared.security import IpRateThrottle
+from apps.shared.utils.result_codes import ERROR_CODE_MAP, ResultCodes
 from apps.shared.utils.utils import error_response, success_response
 from apps.user.api.serializers.telegram_otp_verify import TelegramOtpVerifySerializer
 from apps.user.services.telegram import TgOtpService
@@ -13,6 +14,7 @@ from apps.user.services.telegram import TgOtpService
 @extend_schema(tags=['user'])
 class TelegramOtpView(GenericAPIView):
     permission_classes = [AllowAny]
+    throttle_classes = [IpRateThrottle]
     serializer_class = None
 
     def post(self, request, *args, **kwargs):
@@ -57,6 +59,7 @@ class TelegramOtpPollView(GenericAPIView):
 
 class TelegramOtpVerifyView(GenericAPIView):
     permission_classes = [AllowAny]
+    throttle_classes = [IpRateThrottle,]
     serializer_class = TelegramOtpVerifySerializer
 
     def post(self, request, *args, **kwargs):

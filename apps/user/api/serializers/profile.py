@@ -2,19 +2,12 @@ from rest_framework import serializers
 
 from apps.user.api.serializers.job import JobSerializer
 from apps.user.api.serializers.region import RegionSerializer
-from apps.user.models import Avatar, User
-
-
-class AvatarSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Avatar
-        fields = ["id", "name", "image"]
+from apps.user.models import User
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     job = JobSerializer()
     region = RegionSerializer()
-    avatar = AvatarSerializer()
 
     class Meta:
         model = User
@@ -48,3 +41,15 @@ class UserLangUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["lang"]
+
+
+class UserProfileImageUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["avatar"]
+
+    def validate_avatar(self, value):
+        max_size = 10 * 1024 * 1024  # 10 MB
+        if value and value.size > max_size:
+            raise serializers.ValidationError("Avatar image size cannot exceed 10 MB.")
+        return value

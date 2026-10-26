@@ -1,13 +1,13 @@
 from django.urls import path
 
 from apps.transaction.api.views import (
-    CheckCodeView,
-    ShopLookupView,
-    BonusSummaryView,
+    AnalyticsView,
     BonusHistoryView,
-    LeaderboardView,
+    BonusSummaryView,
     ChallengeListView,
-    AnalyticsView
+    CheckCodeView,
+    LeaderboardView,
+    ShopLookupView,
 )
 
 urlpatterns = [

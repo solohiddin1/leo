@@ -20,6 +20,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(read_only=True, many=True)
     category = ProductSubCategorySerializer(read_only=True)
     bonus_summa = serializers.SerializerMethodField()
+    is_active = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -31,7 +32,12 @@ class ProductListSerializer(serializers.ModelSerializer):
             "bonus_summa",
             "images",
             "category",
+            "is_active",
         ]
+
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_active(self, obj):
+        return bool(obj.is_active and (obj.price or 0) > 0)
 
     @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_bonus_summa(self, obj):
@@ -44,6 +50,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class AffordableProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(read_only=True, many=True)
     category = ProductSubCategorySerializer(read_only=True)
+    is_active = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -54,13 +61,19 @@ class AffordableProductSerializer(serializers.ModelSerializer):
             "price",
             "images",
             "category",
+            "is_active",
         ]
+
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_active(self, obj):
+        return bool(obj.is_active and (obj.price or 0) > 0)
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(read_only=True, many=True)
     category = ProductSubCategorySerializer(read_only=True)
     bonus_summa = serializers.SerializerMethodField()
+    is_active = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -74,8 +87,13 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "bonus_summa",
             "images",
             "category",
+            "is_active",
             "created_at",
         ]
+
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_active(self, obj):
+        return bool(obj.is_active and (obj.price or 0) > 0)
 
     @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_bonus_summa(self, obj):

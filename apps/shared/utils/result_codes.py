@@ -40,6 +40,7 @@ class ResultCodes(Enum):
     LINK_EXPIRED = -35
     INVALID_REQUEST = -36
     INVALID_OTP = -37
+    PRODUCT_OUT_OF_STOCK = -38
 
 
 
@@ -233,6 +234,11 @@ ResultMessages = {
         "en": "Incorrect verification code.",
         "ru": "Неверный код подтверждения.",
         "uz": "Tasdiqlash kodi noto'g'ri.",
+    },
+    "PRODUCT_OUT_OF_STOCK": {
+        "en": "Product is out of stock.",
+        "ru": "Товара нет в наличии.",
+        "uz": "Mahsulot qolmagan.",
     },
 }
 

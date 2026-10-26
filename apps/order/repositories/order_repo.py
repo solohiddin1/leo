@@ -149,6 +149,9 @@ class OrderRepo:
         if not items:
             return None
 
+        if any(not item.product.is_active or (item.product.price or 0) <= 0 for item in items):
+            return None
+
         total_price = sum(item.price * item.quantity for item in items)
 
         if user.balance < total_price:

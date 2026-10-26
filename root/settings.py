@@ -176,6 +176,7 @@ REST_FRAMEWORK = {
         "otp": "5/hour",
         "login": "10/hour",
         "general": "100/hour",
+        "ip_rate": "100/hour",
     },
 }
 
