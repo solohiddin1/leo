@@ -6,15 +6,16 @@ from apps.user.models import Device, Job, Otp, TelegramLoginToken, User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("username", "first_name", "last_name", "balance", "email")
-    search_fields = ("username", "first_name", "last_name", "telegram_id", "telegram_username", "email")
+    list_display = ("username", "first_name", "last_name", "balance")
+    search_fields = ("username", "first_name", "last_name", "telegram_id", "telegram_username")
     exclude = ('password',)
 
 
 @admin.register(Otp)
 class OtpAdmin(admin.ModelAdmin):
     list_display = ("user", "code", "phone_number", "created_at", "expires_at")
-    search_fields = ("user__username", "user__first_name", "user__last_name", "code", "phone_number")
+    search_fields = ("user__username", "user__first_name", "user__last_name", "code",
+                     "phone_number")
 
 
 @admin.register(TelegramLoginToken)
