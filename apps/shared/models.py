@@ -38,10 +38,14 @@ class SiteConfig(BaseModel):
     send_otp_code = models.BooleanField(default=False)
     otp_wait_seconds = models.IntegerField(default=0)
     otp_timeout_seconds = models.IntegerField(default=0)
+    training_video_reward_points = models.BigIntegerField(
+        default=0,
+        verbose_name="Trening video uchun ball (Training video reward points)",
+    )
 
     def __str__(self):
         return (
-            f"{self.send_otp_code}-{self.otp_wait_seconds}-{self.otp_timeout_seconds}"
+            f"OTP: {self.send_otp_code} | Video reward: {self.training_video_reward_points}"
         )
 
 
@@ -101,13 +105,41 @@ class FAQ(BaseModel):
         return self.question
 
 
+class TrainingVideoStatus(models.TextChoices):
+    PENDING = "pending", "Kutilmoqda (Pending)"
+    APPROVED = "approved", "Tasdiqlangan (Approved)"
+    REJECTED = "rejected", "Rad etilgan (Rejected)"
+
+
 class TrainingVideo(BaseModel):
+    user = models.ForeignKey(
+        "user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="training_videos",
+        verbose_name="Yuklagan foydalanuvchi",
+    )
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, default="")
     youtube_url = models.CharField(max_length=500, blank=True, default="")
     file = models.FileField(upload_to="training_videos/", null=True, blank=True)
     ordering = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    status = models.CharField(
+        max_length=20,
+        choices=TrainingVideoStatus.choices,
+        default=TrainingVideoStatus.APPROVED,
+        verbose_name="Holat (Status)",
+    )
+    points_awarded = models.BooleanField(
+        default=False,
+        verbose_name="Ball berilganmi (Points awarded)",
+    )
+    awarded_points = models.BigIntegerField(
+        default=0,
+        verbose_name="Berilgan ball miqdori (Awarded points amount)",
+    )
 
     class Meta:
         ordering = ["ordering", "-created_at"]

@@ -10,6 +10,7 @@ from apps.shared.models import (
     SiteConfig,
     Store,
     TrainingVideo,
+    TrainingVideoStatus,
 )
 
 
@@ -29,7 +30,13 @@ class StoreAdmin(admin.ModelAdmin):
 
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):
-    list_display = ("id", "send_otp_code", "otp_wait_seconds", "otp_timeout_seconds")
+    list_display = (
+        "id",
+        "send_otp_code",
+        "otp_wait_seconds",
+        "otp_timeout_seconds",
+        "training_video_reward_points",
+    )
 
 
 @admin.register(Banner)
@@ -63,6 +70,51 @@ class FAQAdmin(CustomAdmin):
 
 @admin.register(TrainingVideo)
 class TrainingVideoAdmin(CustomAdmin):
-    list_display = ("id", "name_uz", "name_ru", "youtube_url", "file", "ordering", "is_active")
+    list_display = (
+        "id",
+        "name_uz",
+        "name_ru",
+        "user",
+        "status",
+        "points_awarded",
+        "awarded_points",
+        "youtube_url",
+        "file",
+        "ordering",
+        "is_active",
+        "created_at",
+    )
     list_editable = ("ordering", "is_active")
-    search_fields = ("name_uz", "name_ru", "description_uz", "description_ru")
+    list_filter = ("status", "points_awarded", "is_active")
+    search_fields = (
+        "name_uz",
+        "name_ru",
+        "description_uz",
+        "description_ru",
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+    )
+    actions = ["approve_videos", "reject_videos"]
+
+    @admin.action(description="Tanlangan videolarni tasdiqlash (va ball berish)")
+    def approve_videos(self, request, queryset):
+        from apps.shared.services.training_video_service import TrainingVideoService
+
+        count, points = TrainingVideoService.approve_videos(queryset)
+        self.message_user(
+            request,
+            f"{count} ta video tasdiqlandi. Foydalanuvchilarga jami {points} ball berildi.",
+        )
+
+    @admin.action(description="Tanlangan videolarni rad etish")
+    def reject_videos(self, request, queryset):
+        updated = queryset.update(status=TrainingVideoStatus.REJECTED)
+        self.message_user(request, f"{updated} ta video rad etildi.")
+
+    def save_model(self, request, obj, form, change):
+        from apps.shared.services.training_video_service import TrainingVideoService
+
+        super().save_model(request, obj, form, change)
+        if obj.status == TrainingVideoStatus.APPROVED and not obj.points_awarded:
+            TrainingVideoService.approve_video(obj)

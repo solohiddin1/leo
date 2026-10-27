@@ -15,6 +15,8 @@ class NotificationType(IntEnum):
     SIGNUP_BONUS = 10
     POINTS_EXPIRING_WARNING = 11
     POINTS_EXPIRED = 12
+    CHALLENGE_PROGRESS = 13
+    TRAINING_VIDEO_APPROVED = 14
 
 
 @dataclass(frozen=True)
@@ -168,6 +170,36 @@ class NotificationMessages:
         },
         image={"UZ": None, "RU": None, "EN": None},
         type=NotificationType.CHALLENGE_COMPLETED,
+    )
+
+    challenge_progress_msg = NotificationMessage(
+        title={
+            "UZ": "🎯 Challenge davom etmoqda",
+            "RU": "🎯 Прогресс челленджа",
+            "EN": "🎯 Challenge progress",
+        },
+        body={
+            "UZ": "Siz '{challenge_title}' challenge'ida {current_count}/{target_count} ta mahsulot to'pladingiz!",
+            "RU": "Вы собрали {current_count}/{target_count} товаров в челлендже «{challenge_title}»!",
+            "EN": "You have collected {current_count}/{target_count} products in the '{challenge_title}' challenge!",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.CHALLENGE_PROGRESS,
+    )
+
+    training_video_approved_msg = NotificationMessage(
+        title={
+            "UZ": "🎬 Video tasdiqlandi",
+            "RU": "🎬 Видео одобрено",
+            "EN": "🎬 Video approved",
+        },
+        body={
+            "UZ": "Siz yuklagan '{video_name}' videosi tasdiqlandi va hisobingizga {points} ball qo'shildi!",
+            "RU": "Загруженное вами видео «{video_name}» одобрено, на ваш баланс начислено {points} баллов!",
+            "EN": "Your uploaded video '{video_name}' has been approved and {points} points were credited to your balance!",
+        },
+        image={"UZ": None, "RU": None, "EN": None},
+        type=NotificationType.TRAINING_VIDEO_APPROVED,
     )
 
     signup_bonus_msg = NotificationMessage(

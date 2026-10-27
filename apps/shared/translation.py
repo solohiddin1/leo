@@ -1,6 +1,6 @@
 from modeltranslation.translator import TranslationOptions, register
 
-from apps.shared.models import AppInfo, FAQ, TrainingVideo
+from apps.shared.models import FAQ, AppInfo, TrainingVideo
 
 
 @register(FAQ)

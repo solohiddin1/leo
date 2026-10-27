@@ -23,7 +23,10 @@ class ChallengeService:
         for challenge in active_challenges:
             progress, _ = ChallengeRepo.get_or_create_progress(user, challenge)
             if not progress.is_completed:
-                progress.current_count = BonusRepo.count_approved_claims_for_product(user, challenge.product)
+                old_count = progress.current_count
+                new_count = BonusRepo.count_approved_claims_for_product(user, challenge.product)
+                progress.current_count = new_count
+
                 if progress.current_count >= challenge.target_count:
                     ChallengeRepo.complete_progress(progress, now)
                     # Reward user
@@ -32,10 +35,43 @@ class ChallengeService:
                     transaction.on_commit(
                         lambda user=user, challenge=challenge: ChallengeService._notify_challenge_completed(user, challenge)
                     )
+                elif new_count > old_count:
+                    transaction.on_commit(
+                        lambda user=user, challenge=challenge, current=new_count, target=challenge.target_count: (
+                            ChallengeService._notify_challenge_progress(user, challenge, current, target)
+                        )
+                    )
                 ChallengeRepo.save_progress(progress)
 
         # Invalidate cache if any changes made
         BonusService._clear_user_balance_cache(user.id)
+
+    @staticmethod
+    def _notify_challenge_progress(
+        user: User, challenge: Challenge, current_count: int, target_count: int
+    ) -> None:
+        from apps.notification.messages import NotificationMessages
+        from apps.notification.services.notification_service import NotificationService
+
+        msg = NotificationMessages.challenge_progress_msg
+        title, body = msg.render(
+            user.lang,
+            challenge_title=challenge.title,
+            current_count=current_count,
+            target_count=target_count,
+        )
+        NotificationService.send_to_user(
+            user=user,
+            title=title,
+            body=body,
+            notification_type="CHALLENGE",
+            data={
+                "type": msg.type.value,
+                "challenge_id": challenge.id,
+                "current_count": current_count,
+                "target_count": target_count,
+            },
+        )
 
     @staticmethod
     def _notify_challenge_completed(user: User, challenge: Challenge) -> None:

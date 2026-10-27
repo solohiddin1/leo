@@ -1,5 +1,15 @@
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
+# from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
+
+
+# class UserManager(BaseUserManager):
+#     def _create_user(self, username, email=None, password=None, **extra_fields):
+#         extra_fields.pop("email", None)
+#         user = self.model(username=username, **extra_fields)
+#         user.set_password(password)
+#         user.save(using=self._db)
+#         return user
 
 
 class BaseModel(models.Model):
@@ -39,8 +49,15 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
 
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
 
+    groups = None
+    user_permissions = None
+    email_address = None
+    email = None
+
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
+
+    # objects = UserManager()
 
     def __str__(self) -> str:
         return f"{self.username}-{self.first_name} {self.last_name}"

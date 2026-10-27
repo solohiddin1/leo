@@ -357,13 +357,26 @@ class Command(BaseCommand):
             fields = row["fields"]
             chat_id = fields["chat_id"]
 
+            phone = (fields.get("phone") or "").strip().replace("+", "")
+
             existing = User.objects.filter(telegram_id=str(chat_id)).first()
+            if not existing and phone:
+                existing = User.objects.filter(username=phone).first()
+
             if existing:
                 user_map[row["pk"]] = existing.id
+                update_fields = []
+                if existing.balance == 0 and fields.get("summa", 0) > 0:
+                    existing.balance = fields["summa"]
+                    update_fields.append("balance")
+                if not existing.telegram_id:
+                    existing.telegram_id = str(chat_id)
+                    update_fields.append("telegram_id")
+                if update_fields:
+                    existing.save(update_fields=update_fields)
                 self._count("users.matched")
                 continue
 
-            phone = (fields.get("phone") or "").strip().replace("+", "")
             username = phone or f"tg_{chat_id}"
             if username in taken_usernames:
                 username = f"{username}_{chat_id}"
