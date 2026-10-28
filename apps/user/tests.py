@@ -1,11 +1,18 @@
 from unittest.mock import patch
 
+from django.contrib import admin
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from apps.notification.messages import NotificationMessages
 from apps.user.models import User
+
+
+class AdminInitializationTest(TestCase):
+    def test_admin_site_loads(self):
+        admin.autodiscover()
 
 
 class UserLangUpdateTestCase(APITestCase):

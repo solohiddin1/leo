@@ -52,7 +52,7 @@ class User(AbstractUser, BaseModel, PermissionsMixin):
     groups = None
     user_permissions = None
     email_address = None
-    email = None
+    # email = None
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
