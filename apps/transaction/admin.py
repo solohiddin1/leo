@@ -51,7 +51,7 @@ class BonusAdmin(admin.ModelAdmin):
 class BonusCodeAdmin(admin.ModelAdmin):
     list_display = ('code', 'bonus_info', 'is_used', 'created_at')
     list_filter = ('is_used', 'bonus')
-    search_fields = ('code', 'bonus__prefix', 'bonus__product__name', 'bonus__product__name_uz', 'bonus__product__name_ru')
+    search_fields = ('code', 'bonus__prefix',)
     list_select_related = ('bonus', 'bonus__product')
 
     def bonus_info(self, obj):
